@@ -9,7 +9,7 @@ import {
     SidebarMenuItem,
 } from "@/components/ui/sidebar"
 
-import { Calendar, File, Home, UserRound } from "lucide-react"
+import { Calendar, File, Home, Settings2, UserRound } from "lucide-react"
 
 // Menu items.
 const items = [
@@ -20,13 +20,13 @@ const items = [
     },
     {
         title: "Calendar",
-        url: "#",
+        url: "/calendar",
         icon: Calendar,
     },
     {
-        title: "Tools",
-        url: "tools",
-        icon: Calendar,
+        title: "Settings",
+        url: "/",
+        icon: Settings2,
     },
     {
         title: "Export data",
