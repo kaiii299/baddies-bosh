@@ -13,7 +13,7 @@ import {
     getSortedRowModel,
     useReactTable,
 } from "@tanstack/react-table"
-import { ArrowUpDown, ChevronDown, MoreHorizontal } from "lucide-react"
+import { ArrowUpDown, ChevronDown, MoreHorizontal, Plus } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -232,6 +232,10 @@ export function DataTableDemo() {
                             })}
                     </DropdownMenuContent>
                 </DropdownMenu>
+                <Button>
+                    <Plus/>
+                    New data
+                </Button>
             </div>
             <div className="rounded-md border">
                 <Table>
