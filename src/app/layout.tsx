@@ -2,11 +2,11 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 import {
-  Sidebar,
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { NavBar } from "@/components/NavBar";
+import { SidebarComponent } from "@/components/sidebarComponent";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -33,9 +33,9 @@ export default function RootLayout({
     <html lang="en">
       <body className="w-screen">
         <SidebarProvider>
-          <Sidebar />
-          <SidebarTrigger />
-          <div className="w-full">
+          <SidebarComponent />
+            <SidebarTrigger   />
+          <div className="w-full m-5">
             <NavBar />
             {children}
           </div>
