@@ -1,9 +1,9 @@
-import { Button } from "@/components/ui/button";
+import { DataTableDemo } from "@/components/tableView";
 
 export default function Home() {
   return (
-    <div>
-      <Button>Click me</Button>
+    <div className="p-10">
+      <DataTableDemo/>
     </div>
   );
 }
