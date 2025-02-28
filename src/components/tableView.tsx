@@ -145,7 +145,7 @@ export const columns: ColumnDef<Payment>[] = [
             return (
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" className="h-8 w-8 p-0">
+                        <Button variant="ghost" className="h-8 w-full p-0">
                             <span className="sr-only">Open menu</span>
                             <MoreHorizontal />
                         </Button>
@@ -204,7 +204,7 @@ export function DataTableDemo() {
                     onChange={(event) =>
                         table.getColumn("email")?.setFilterValue(event.target.value)
                     }
-                    className="max-w-sm"
+                    className=""
                 />
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
