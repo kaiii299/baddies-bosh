@@ -1,7 +1,11 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
-import { Sidebar, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import {
+  Sidebar,
+  SidebarProvider,
+  SidebarTrigger,
+} from "@/components/ui/sidebar";
 import { NavBar } from "@/components/NavBar";
 
 const geistSans = localFont({
@@ -27,12 +31,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className="w-full">
+      <body className="w-screen">
         <SidebarProvider>
           <Sidebar />
           <SidebarTrigger />
-          <div>
-            <NavBar/>
+          <div className="w-full">
+            <NavBar />
             {children}
           </div>
         </SidebarProvider>
