@@ -6,6 +6,7 @@ import { Label, Pie, PieChart, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveC
 
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
+import CountUp from "@/components/countup"
 
 const cardData = [
   { title: "Metric 1", description: "Some description", value: "100%" },
@@ -54,7 +55,16 @@ export default function Dashboard() {
               <CardDescription>{card.description}</CardDescription>
             </CardHeader>
             <CardContent className="flex justify-center items-center">
-              <h2 className="text-4xl font-bold">{card.value}</h2>
+              <h2 className="text-4xl font-bold">
+                <CountUp
+                  from={0}
+                  to={parseInt(card.value)}
+                  separator=","
+                  direction="up"
+                  duration={1}
+                  className="count-up-text"
+                />
+              </h2>
             </CardContent>
             <CardFooter className="flex justify-between"></CardFooter>
           </Card>
