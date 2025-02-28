@@ -17,13 +17,8 @@ import { Calendar, Home, Inbox, Search, Settings } from "lucide-react"
 const items = [
     {
         title: "Home",
-        url: "#",
+        url: "/",
         icon: Home,
-    },
-    {
-        title: "Inbox",
-        url: "#",
-        icon: Inbox,
     },
     {
         title: "Calendar",
@@ -31,12 +26,17 @@ const items = [
         icon: Calendar,
     },
     {
-        title: "Search",
+        title: "Tools",
+        url: "tools",
+        icon: Calendar,
+    },
+    {
+        title: "Export data",
         url: "#",
         icon: Search,
     },
     {
-        title: "Settings",
+        title: "Profile",
         url: "#",
         icon: Settings,
     },
