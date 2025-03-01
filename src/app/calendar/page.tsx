@@ -1,8 +1,6 @@
 "use client";
 import React from "react";
 import dynamic from "next/dynamic";
-// import { CalendarDatePicker } from "@/components/calendar";
-// import { DateRange } from "react-day-picker";
 import { CalendarEvent, Mode } from "@/components/calendar/calendar-types";
 import { generateMockEvents } from "@/lib/mock";
 import {
