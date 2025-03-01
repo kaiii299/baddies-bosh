@@ -15,7 +15,7 @@ import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 
-import { Calendar, Home, Table2 } from "lucide-react";
+import { Calendar, Home, Table2, Search, Bot } from "lucide-react";
 
 /**
  * Navigation items for the sidebar
@@ -36,6 +36,11 @@ const items = [
     title: "Tables",
     url: "/tables",
     icon: Table2,
+  },
+  {
+    title: "Baddies AI",
+    url: "/baddiesai",
+    icon: Bot,
   },
   // Commented out items retained for future use
   // {
