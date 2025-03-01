@@ -10,27 +10,27 @@ datasource db {
 
 model Tools {
   // id                       String    @id @default(uuid())
-  serialIdNo               String  @id @default(uuid())
-  div                      String? @map("div")
-  description              String  @map("description")
-  standard                 String? @map("standard")
-  category                 String? @map("category")
-  brand                    String  @map("brand")
-  tag                      String? @map("tag")
-  modelPartNo              String? @map("modelPartNo")
-  range                    String? @map("range")
-  externalToleranceLimit   String? @map("externalToleranceLimit")
-  internalToleranceLimit   String? @map("internalTolerenceLimit")
-  inUse                    String  @map("inUse")
-  calibrationInterval      String? @map("calibrationInterval")
-  lastCalibration          String? @map("lastCalibration")
-  calibrationDue           String? @map("calibrationDue")
-  remainingMonths          String?    @map("remainingMths")
-  externalCal              String? @map("externalCal")
-  calibrationReportNumber  String? @map("calibrationReportNumber")
-  calibrator               String? @map("calibrator")
-  pic                      String? @map("pic")
-  actionForRenewalReminder String? @map("actionForRenewalReminder")
+  serialIdNo               String    @id @default(uuid())
+  div                      String?   @map("div")
+  description              String    @map("description")
+  standard                 String?   @map("standard")
+  category                 String?   @map("category")
+  brand                    String    @map("brand")
+  tag                      String?   @map("tag")
+  modelPartNo              String?   @map("modelPartNo")
+  range                    String?   @map("range")
+  externalToleranceLimit   String?   @map("externalToleranceLimit")
+  internalToleranceLimit   String?   @map("internalTolerenceLimit")
+  inUse                    String    @map("inUse")
+  calibrationInterval      String?   @map("calibrationInterval")
+  lastCalibration          String?   @map("lastCalibration")
+  calibrationDue           String?   @map("calibrationDue")
+  remainingMonths          String?   @map("remainingMths")
+  externalCal              String?   @map("externalCal")
+  calibrationReportNumber  String?   @map("calibrationReportNumber")
+  calibrator               String?   @map("calibrator")
+  pic                      String?   @map("pic")
+  actionForRenewalReminder String?   @map("actionForRenewalReminder")
   Calendar                 Calendar?
 
   // createdAt DateTime @default(now())
@@ -38,11 +38,11 @@ model Tools {
 }
 
 model Calendar {
-  id                       String  @id @default(uuid())  
+  id                       String  @id @default(uuid())
   serialIdNo               String  @unique @map("serialIdNo") // FK to Tools.serialIdNo
   predictedCalibrationDate String  @default("") @map("predictedCalibrationDate")
   riskLevel                Int     @default(1) @map("riskLevel")
   isAccepted               Boolean @default(false) @map("isAccepted")
 
-  Tools                    Tools   @relation(fields: [serialIdNo], references: [serialIdNo])
+  Tools Tools @relation(fields: [serialIdNo], references: [serialIdNo])
 }
