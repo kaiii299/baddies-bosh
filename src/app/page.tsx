@@ -12,8 +12,7 @@ import { Tools } from "@prisma/client"
 // Fetch data from the API
 async function getToolsData() {
   try {
-    const baseUrl = "baddies-bosh.vercel.app"
-    const res = await fetch(`${baseUrl}/api/tools`, {
+    const res = await fetch(`/api/tools`, {
       cache: 'no-store',
       headers: {
         'Content-Type': 'application/json',
