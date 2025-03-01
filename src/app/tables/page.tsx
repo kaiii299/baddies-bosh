@@ -4,7 +4,7 @@ import React from 'react'
 async function getTools() {
   try {
     // Use absolute URL in development
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
     const res = await fetch(`${baseUrl}/api/tools`, {
       cache: 'no-store',
       headers: {
