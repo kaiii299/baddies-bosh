@@ -1,4 +1,4 @@
-import { DataTableDemo } from '@/components/tableView';
+import { DataTable } from '@/components/tableView';
 import React from 'react'
 
 async function getTools() {
@@ -29,7 +29,7 @@ export default async function ToolsPage() {
 
   return (
     <div className="w-full">
-      <DataTableDemo initialData={tools} />
+      <DataTable initialData={tools} />
     </div>
   );
 }
