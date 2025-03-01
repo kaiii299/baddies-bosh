@@ -110,7 +110,7 @@ export function SidebarComponent() {
             {/* <span>Logout</span> */}
           </div>
           <div className="text-xs text-muted-foreground">
-            © {new Date().getFullYear()} BaddieBosch
+            © 2025 Baddie Bosch
             <br />
             All rights reserved.
           </div>
