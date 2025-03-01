@@ -35,11 +35,13 @@ export default function RootLayout({
       <body className="w-screen">
         <SidebarProvider>
           <SidebarComponent />
-          <SidebarTrigger />
-          <div className="w-full m-5">
-            <div>
+          <div className="fixed top-4 left-4 z-50 md:hidden">
+            <SidebarTrigger />
+          </div>
+          <div className="w-full p-5">
+            {/* <div>
               <NavBar />
-            </div>
+            </div> */}
             <div className="my-10">
               {children}
             </div>
