@@ -15,7 +15,7 @@ import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 
-import { Calendar, Home, Table2, Search, Bot } from "lucide-react";
+import { Calendar, Home, Table2, Bot } from "lucide-react";
 
 /**
  * Navigation items for the sidebar

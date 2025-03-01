@@ -26,7 +26,7 @@ export function DialogComponent({ children }: DialogComponentProps) {
         <DialogHeader>
           <DialogTitle>Edit profile</DialogTitle>
           <DialogDescription>
-            Make changes to your profile here. Click save when you're done.
+            You&apos;re about to delete this item. This action cannot be undone.
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">

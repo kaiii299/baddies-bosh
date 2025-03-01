@@ -36,9 +36,6 @@ export default function RootLayout({
             <SidebarTrigger />
           </div>
           <div className="w-full p-5">
-            {/* <div>
-              <NavBar />
-            </div> */}
             <div className="my-10">{children}</div>
           </div>
           <Toaster position="top-right" />

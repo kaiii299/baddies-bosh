@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 import CountUp from "@/components/countup"
 import { DashboardCharts } from '@/components/dashboard/charts';
+import { Tools } from "@prisma/client"
 // Fetch data from the API
 async function getToolsData() {
   try {
@@ -38,14 +39,14 @@ export default async function Dashboard() {
   const totalTools = tools.length;
 
   // Tools in use count
-  const toolsInUse = tools.filter((tool: any) => tool.inUse?.toLowerCase() === 'yes').length;
+  const toolsInUse = tools.filter((tool: Tools) => tool.inUse?.toLowerCase() === 'yes').length;
   const inUsePercentage = totalTools > 0 ? Math.round((toolsInUse / totalTools) * 100) : 0;
 
   // Count unique brands
-  const uniqueBrands = new Set(tools.map((tool: any) => tool.brand)).size;
+  const uniqueBrands = new Set(tools.map((tool: Tools) => tool.brand)).size;
 
   // Count tools needing calibration soon (within 3 months)
-  const toolsNeedingCalibration = tools.filter((tool: any) => {
+  const toolsNeedingCalibration = tools.filter((tool: Tools) => {
     const months = parseInt(tool.remainingMonths || '999');
     return !isNaN(months) && months <= 3 && months >= 0;
   }).length;
@@ -75,7 +76,7 @@ export default async function Dashboard() {
   ]
 
   // Process brand data for pie chart
-  const brandCounts = tools.reduce((acc: Record<string, number>, tool: any) => {
+  const brandCounts = tools.reduce((acc: Record<string, number>, tool: Tools) => {
     const brand = tool.brand || 'Other';
     acc[brand] = (acc[brand] || 0) + 1;
     return acc;
@@ -98,7 +99,7 @@ export default async function Dashboard() {
     .slice(0, 5);
 
   // Process division data for bar chart
-  const divisionCounts = tools.reduce((acc: Record<string, number>, tool: any) => {
+  const divisionCounts = tools.reduce((acc: Record<string, number>, tool: Tools) => {
     const division = tool.div || 'Unspecified';
     acc[division] = (acc[division] || 0) + 1;
     return acc;

@@ -13,7 +13,7 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { ChevronDown, MoreHorizontal, Plus } from "lucide-react";
+import { ChevronDown, Plus } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -21,9 +21,6 @@ import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
@@ -35,7 +32,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useRouter } from "next/navigation";
 import { DialogComponent } from "./dialogComponent";
 
 /**
@@ -207,8 +203,6 @@ export function DataTable({ initialData = [] }: DataTableDemoProps) {
     },
   });
 
-  const router = useRouter();
-
   return (
     <div className="w-full">
       <h2 className="text-2xl font-bold ">Tables</h2>
@@ -286,7 +280,6 @@ export function DataTable({ initialData = [] }: DataTableDemoProps) {
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
-                  // onClick={() => router.push(`/tools/${row.original.serialIdNo}`)}
                   className="cursor-pointer hover:bg-muted transition"
                 >
                   {row.getVisibleCells().map((cell) => (

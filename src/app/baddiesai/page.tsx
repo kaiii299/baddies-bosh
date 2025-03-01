@@ -1,10 +1,9 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
-import { Bot, User, Trash2 } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
+import { Bot, User } from "lucide-react";
+import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { motion } from "framer-motion";
 
@@ -148,9 +147,9 @@ const loadMessagesFromStorage = (): Message[] => {
     if (!savedMessages) return [];
     
     // Convert timestamp strings back to Date objects
-    return JSON.parse(savedMessages).map((msg: any) => ({
+    return JSON.parse(savedMessages).map((msg: Record<string, unknown>) => ({
       ...msg,
-      timestamp: new Date(msg.timestamp)
+      timestamp: new Date(msg.timestamp as string)
     }));
   } catch (error) {
     console.error('Failed to load messages from localStorage:', error);
@@ -170,7 +169,6 @@ export default function BaddiesAIPage() {
   // Initialize with just the welcome message for server rendering
   const [messages, setMessages] = useState<Message[]>([welcomeMessage]);
   const [isInitialized, setIsInitialized] = useState(false);
-  const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [suggestedReplies, setSuggestedReplies] = useState<string[]>(suggestedReplySets[0]);
   
@@ -217,11 +215,11 @@ export default function BaddiesAIPage() {
   }, [messages]);
 
   // Clear chat history
-  const clearHistory = () => {
-    setMessages([welcomeMessage]);
-    setSuggestedReplies(suggestedReplySets[0]);
-    localStorage.removeItem('baddiesAI_messages');
-  };
+  // const clearHistory = () => {
+  //   setMessages([welcomeMessage]);
+  //   setSuggestedReplies(suggestedReplySets[0]);
+  //   localStorage.removeItem('baddiesAI_messages');
+  // };
   
   // Process a message from suggestion
   const processMessage = (messageText: string) => {
