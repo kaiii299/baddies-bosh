@@ -77,6 +77,45 @@ const CalendarPage = () => {
   );
   const [mode, setMode] = React.useState<Mode>("month");
   const [date, setDate] = React.useState<Date>(new Date());
+  const [acceptedTools, setAcceptedTools] = React.useState<number[]>([]);
+
+  // Function to add a calibration event to the calendar
+  const addCalibrationEvent = (tool: data) => {
+    // Create a new event object
+    const newEvent: CalendarEvent = {
+      id: `tool-${tool.id}-${Date.now()}`, // Create a unique ID
+      title: `Calibrate: ${tool.tooldesc}`,
+      color: getRiskColor(tool.risk),
+      start: new Date(tool.recDate),
+      end: new Date(
+        new Date(tool.recDate).setHours(new Date(tool.recDate).getHours() + 1)
+      ), // 1 hour duration
+      description: `Tool ID: ${tool.id}, Model: ${tool.model}, Risk Level: ${tool.risk}`,
+    };
+
+    // Add the new event to the events array
+    setEvents((prevEvents) => [...prevEvents, newEvent]);
+
+    // Mark this tool as accepted
+    setAcceptedTools((prev) => [...prev, tool.id]);
+
+    // Set the calendar date to the recommended calibration date
+    setDate(new Date(tool.recDate));
+  };
+
+  // Helper function to map risk level to color
+  const getRiskColor = (risk: number): string => {
+    switch (risk) {
+      case 1:
+        return "green";
+      case 2:
+        return "yellow";
+      case 3:
+        return "red";
+      default:
+        return "blue";
+    }
+  };
 
   return (
     <div className="">
@@ -91,22 +130,19 @@ const CalendarPage = () => {
           <ScrollArea className="w-full h-full pb-20">
             <CardContent className="gap-4 flex flex-col">
               {mockData.map((data: data, index) => (
-                <React.Fragment key={index}>{listCard(data)}</React.Fragment>
+                <React.Fragment key={index}>
+                  {listCard(
+                    data,
+                    addCalibrationEvent,
+                    acceptedTools.includes(data.id)
+                  )}
+                </React.Fragment>
               ))}
             </CardContent>
           </ScrollArea>
           {/* <CardFooter>
             <p>Card Footer</p>
           </CardFooter> */}
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Calibration dates</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p>Card Content</p>
-          </CardContent>
         </Card>
       </div>
 
@@ -130,7 +166,11 @@ const riskColors: Record<number, string> = {
   3: "bg-red-500 text-white", // High risk
 };
 
-const listCard = (data: data) => {
+const listCard = (
+  data: data,
+  onAccept: (data: data) => void,
+  isAccepted: boolean
+) => {
   // Format dates consistently to avoid hydration errors
   const formatDate = (date: Date): string => {
     return `${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear()}`;
@@ -164,7 +204,13 @@ const listCard = (data: data) => {
           {formatDate(data.recDate)}
           <div className="flex justify-end gap-3">
             <Button variant={"secondary"}>Decline</Button>
-            <Button className="bg-green-500">Accept</Button>
+            <Button
+              className={isAccepted ? "bg-gray-400" : "bg-green-500"}
+              onClick={() => !isAccepted && onAccept(data)}
+              disabled={isAccepted}
+            >
+              {isAccepted ? "Added" : "Accept"}
+            </Button>
           </div>
         </div>
       </div>
