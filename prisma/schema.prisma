@@ -1,38 +1,50 @@
-
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
   directUrl = env("DIRECT_URL")
 }
 
 model Tools {
-  id                   String   @id @default(uuid())
-  division             String?  // "Div."
-  description          String?  // "Description"
-  standard             String?  // "Standard"
-  category             String?  // "Category"
-  brand                String?  // "Brand (Make)"
-  tag                  String?  // "Tag"
-  modelPartNo          String?  // "Model/Part No"
-  serialIdNo           String?  // "Serial / Id no"
-  range                String?  // "Range"
-  toleranceLimit       String?  // "Tolerence Limit"
-  internalLimit        String?  // "Unnamed: 10" (you can rename this to something meaningful like `internalLimit`)
-  inUse                 Boolean? // "In USE?\n(Y=Yes;\n N=No)"
-  calibrationInterval   Int?     // "Actual\nCalibration\nInterval\n(No. of Yr)"
-  lastCalibration       DateTime? // "Last \nCalibration"
-  calibrationDue        DateTime? // "Calibration \nDue"
-  remainingMonths       Int?     // "Remaining mths before Calibration due date"
-  externalCal           String?  // "1. External Cal:\n In-House / Lab"
-  calibrationReportNo   String?  // "Calibration Report\nNumber"
-  calibrator            String?  // "Calibrator"
-  pic                   String?  // "P.I.C."
-  renewalAction         String?  // "Action for Renewal Reminder"
+  // id                       String    @id @default(uuid())
+  serialIdNo               String  @id @default(uuid())
+  div                      String? @map("div")
+  description              String  @map("description")
+  standard                 String? @map("standard")
+  category                 String? @map("category")
+  brand                    String  @map("brand")
+  tag                      String? @map("tag")
+  modelPartNo              String? @map("modelPartNo")
+  range                    String? @map("range")
+  externalToleranceLimit   String? @map("externalToleranceLimit")
+  internalToleranceLimit   String? @map("internalTolerenceLimit")
+  inUse                    String  @map("inUse")
+  calibrationInterval      String? @map("calibrationInterval")
+  lastCalibration          String? @map("lastCalibration")
+  calibrationDue           String? @map("calibrationDue")
+  remainingMonths          String?    @map("remainingMths")
+  externalCal              String? @map("externalCal")
+  calibrationReportNumber  String? @map("calibrationReportNumber")
+  calibrator               String? @map("calibrator")
+  pic                      String? @map("pic")
+  actionForRenewalReminder String? @map("actionForRenewalReminder")
+  // Calendar                 Calendar?
 
-  createdAt             DateTime @default(now())
-  updatedAt             DateTime @updatedAt
+  // createdAt DateTime @default(now())
+  // updatedAt DateTime @updatedAt
 }
+
+// model Calendar {
+//   id         String  @id @default(uuid())
+//   toolId     String  @unique // Foreign key to Tool table
+//   isAccepted Boolean @default(false) // Whether the event was accepted in the calendar
+//   riskLevel  Int // Risk level (1, 2, 3)
+
+//   tools Tools @relation(fields: [toolId], references: [serialIdNo], onDelete: Cascade)
+
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
+// }
