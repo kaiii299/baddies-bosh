@@ -12,7 +12,8 @@ import { Tools } from "@prisma/client"
 // Fetch data from the API
 async function getToolsData() {
   try {
-    const res = await fetch(`/api/tools`, {
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL 
+    const res = await fetch(`${baseUrl}/api/tools`, {
       cache: 'no-store',
       headers: {
         'Content-Type': 'application/json',
