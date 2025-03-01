@@ -5,7 +5,6 @@ import {
   SidebarContent,
   SidebarGroup,
   SidebarGroupContent,
-  SidebarGroupLabel,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
@@ -16,12 +15,7 @@ import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 
-import {
-  Calendar,
-  Home,
-  Table2,
-  LogOut,
-} from "lucide-react";
+import { Calendar, Home, Table2 } from "lucide-react";
 
 // Menu items.
 const items = [
@@ -56,41 +50,45 @@ export function SidebarComponent() {
   const pathname = usePathname();
 
   return (
-    <Sidebar 
-      collapsible="offcanvas" 
-      className="hidden md:flex"
-    >
+    <Sidebar collapsible="offcanvas" className="hidden md:flex">
       <SidebarHeader className="h-10 flex items-center  border-b">
         <div className="flex items-end justify-end">
           <span className="font-bold text-lg">Baddie Bosch</span>
         </div>
       </SidebarHeader>
-      
+
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>
               {items.map((item) => {
-                const isActive = pathname === item.url || 
-                               (item.url !== "/" && pathname.startsWith(item.url));
-                
+                const isActive =
+                  pathname === item.url ||
+                  (item.url !== "/" && pathname.startsWith(item.url));
+
                 return (
                   <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton asChild>
-                      <Link 
+                      <Link
                         href={item.url}
                         className={cn(
                           "flex items-center gap-3 rounded-lg px-3 py-3",
-                          isActive && "bg-pink-600 py-3 hover:bg-pink-600"
+                          isActive
+                            ? "bg-pink-600 hover:bg-pink-700"
+                            : "hover:bg-stone-100"
                         )}
                       >
-                        <item.icon className={cn(
-                          "h-4 w-4",
-                          isActive ? "text-white" : "text-muted-foreground"
-                        )} />
-                        <span className={cn(
-                          isActive ? "text-white" : "text-muted-foreground"
-                        )}>
+                        <item.icon
+                          className={cn(
+                            "h-4 w-4",
+                            isActive ? "text-white" : "text-muted-foreground"
+                          )}
+                        />
+                        <span
+                          className={cn(
+                            isActive ? "text-white" : "text-muted-foreground"
+                          )}
+                        >
                           {item.title}
                         </span>
                       </Link>
@@ -102,7 +100,7 @@ export function SidebarComponent() {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
-      
+
       <SidebarFooter className="border-t p-4">
         <div className="flex flex-col gap-4">
           <div className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition cursor-pointer">
