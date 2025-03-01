@@ -191,6 +191,7 @@ const CalendarPage = () => {
 
   return (
     <div className="">
+      <h2 className="text-2xl font-bold mb-4">Your Calendar</h2>
       <div className="flex gap-4 flex-col mb-6">
         <Card className="h-[500px] overflow-hidden">
           <CardHeader>
