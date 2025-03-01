@@ -14,6 +14,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Button } from "@/components/ui/button";
 
 type data = {
   id: number;
@@ -80,8 +81,8 @@ const CalendarPage = () => {
   const [date, setDate] = React.useState<Date>(new Date());
 
   return (
-    <div>
-      <div className="flex gap-2 flex-row">
+    <div className="">
+      <div className="flex gap-4 flex-col mb-6">
         <Card className="">
           <CardHeader>
             <CardTitle>Suggested days to calibrate tools</CardTitle>
@@ -89,17 +90,18 @@ const CalendarPage = () => {
               Based on previous calibration data
             </CardDescription>
           </CardHeader>
-          <ScrollArea className="rounded-md border">
-            <CardContent>
+          <ScrollArea>
+            <CardContent className="gap-4 flex flex-col">
               {mockData.map((data: data, index) => (
                 <React.Fragment key={index}>{listCard(data)}</React.Fragment>
               ))}
             </CardContent>
           </ScrollArea>
-          <CardFooter>
+          {/* <CardFooter>
             <p>Card Footer</p>
-          </CardFooter>
+          </CardFooter> */}
         </Card>
+
         <Card>
           <CardHeader>
             <CardTitle>Calibration dates</CardTitle>
@@ -109,6 +111,7 @@ const CalendarPage = () => {
           </CardContent>
         </Card>
       </div>
+
       <div>
         <Calendar
           events={events}
@@ -123,20 +126,46 @@ const CalendarPage = () => {
   );
 };
 
+const riskColors: any = {
+  1: "bg-green-500 text-white", // Low risk
+  2: "bg-yellow-500 text-black", // Medium risk
+  3: "bg-red-500 text-white", // High risk
+};
+
 const listCard = (data: data) => {
   return (
-    <Card className="w-full h-16 my-2 p-2">
-      <div className="flex gap-4">
-        <p>
-          Tool: {data.tooldesc} ID: {data.id} Model: {data.model}
-        </p>
-        <p>Calibration Date: {data.calibrationDate.toLocaleDateString()}</p>
-        <p>
-          Recommended Calibration Date: {data.recDate.toLocaleDateString()} |
-          Risk Level: {data.risk}
-        </p>
+    <div className="p-4 border rounded-lg bg-white shadow-md space-y-2">
+      <div className="flex justify-between items-center">
+        <div>
+          <p className="font-semibold text-lg">{data.tooldesc}</p>
+          <p className="text-sm text-gray-500">
+            ID: {data.id} | Model: {data.model}
+          </p>
+        </div>
+        <div
+          className={`px-3 py-1 rounded-full text-xs font-medium ${
+            riskColors[data.risk]
+          }`}
+        >
+          Risk Level {data.risk}
+        </div>
       </div>
-    </Card>
+
+      <div className="text-sm text-gray-700 space-y-1">
+        <p>
+          <span className="font-medium">Calibration Date:</span>{" "}
+          {data.calibrationDate.toLocaleDateString()}
+        </p>
+        <div>
+          <span className="font-medium">Recommended Calibration Date:</span>{" "}
+          {data.recDate.toLocaleDateString()}
+          <div className="flex justify-end gap-3">
+            <Button>Accept</Button>
+            <Button variant={"destructive"}>Decline</Button>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 };
 
