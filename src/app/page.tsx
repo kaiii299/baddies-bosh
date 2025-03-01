@@ -245,7 +245,7 @@ export default async function Dashboard() {
 
         {/* Add the DashboardCharts component below the original charts */}
         <div className="mt-8">
-          <h2 className="text-2xl font-bold mb-4">Tool Analytics</h2>
+          <h2 className="text-2xl font-bold mb-4">Tool Analytics <span className="text-sm text-slate-400">(using AI)</span></h2>
           <DashboardCharts tools={tools} />
         </div>
       </div>
