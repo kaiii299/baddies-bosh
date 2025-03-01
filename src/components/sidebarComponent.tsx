@@ -53,7 +53,7 @@ export function SidebarComponent() {
     <Sidebar collapsible="offcanvas" className="hidden md:flex">
       <SidebarHeader className="h-10 flex items-center  border-b">
         <div className="flex items-end justify-end">
-          <span className="font-bold text-lg">Baddie Bosch</span>
+          <span className="font-bold text-lg">Baddie Borsch</span>
         </div>
       </SidebarHeader>
 

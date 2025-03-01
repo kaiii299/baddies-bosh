@@ -176,6 +176,12 @@ export function DataTable({ initialData = [] }: DataTableDemoProps) {
       columnVisibility,
       rowSelection,
     },
+    // Pagination
+    initialState: {
+      pagination: {
+        pageSize: 15,
+      },
+    },
   });
 
   const router = useRouter();
@@ -250,7 +256,7 @@ export function DataTable({ initialData = [] }: DataTableDemoProps) {
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
-                  onClick={() => router.push(`/tools/${row.original.serialIdNo}`)}
+                  // onClick={() => router.push(`/tools/${row.original.serialIdNo}`)}
                   className="cursor-pointer hover:bg-muted transition"
                 >
                   {row.getVisibleCells().map((cell) => (
@@ -281,7 +287,7 @@ export function DataTable({ initialData = [] }: DataTableDemoProps) {
           {table.getFilteredSelectedRowModel().rows.length} of{" "}
           {table.getFilteredRowModel().rows.length} row(s) selected.
         </div>
-        <div className="space-x-2">
+        <div className="space-x-2 flex items-center">
           <Button
             variant="outline"
             size="sm"
@@ -290,6 +296,12 @@ export function DataTable({ initialData = [] }: DataTableDemoProps) {
           >
             Previous
           </Button>
+          
+          <div className="text-sm font-medium">
+            Page {table.getState().pagination.pageIndex + 1} of{" "}
+            {table.getPageCount()}
+          </div>
+          
           <Button
             variant="outline"
             size="sm"
