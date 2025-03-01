@@ -31,20 +31,20 @@ model Tools {
   calibrator               String? @map("calibrator")
   pic                      String? @map("pic")
   actionForRenewalReminder String? @map("actionForRenewalReminder")
-  // Calendar                 Calendar?
+  Calendar                 Calendar?
 
   // createdAt DateTime @default(now())
   // updatedAt DateTime @updatedAt
 }
 
-// model Calendar {
-//   id         String  @id @default(uuid())
-//   toolId     String  @unique // Foreign key to Tool table
-//   isAccepted Boolean @default(false) // Whether the event was accepted in the calendar
-//   riskLevel  Int // Risk level (1, 2, 3)
+model Calendar {
+  id         String  @id @default(uuid())
+  toolId     String  @unique // Foreign key to Tool table
+  isAccepted Boolean @default(false) // Whether the event was accepted in the calendar
+  riskLevel  Int // Risk level (1, 2, 3)
 
-//   tools Tools @relation(fields: [toolId], references: [serialIdNo], onDelete: Cascade)
+  tools Tools @relation(fields: [toolId], references: [serialIdNo], onDelete: Cascade)
 
-//   createdAt DateTime @default(now())
-//   updatedAt DateTime @updatedAt
-// }
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
