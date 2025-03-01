@@ -91,7 +91,7 @@ export function SidebarComponent() {
                           "flex items-center gap-3 rounded-lg px-3 py-3",
                           // Apply different styles based on active state
                           isActive
-                            ? "bg-pink-600 hover:bg-pink-700"
+                            ? "bg-pink-600 hover:bg-pink-600"
                             : "hover:bg-stone-100"
                         )}
                       >
