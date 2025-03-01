@@ -15,58 +15,19 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
+import { Tools } from "@prisma/client";
 
-type data = {
-  id: number;
-  tooldesc: string;
-  model: string;
-  risk: number;
+// Extended type for tool data with calculated fields
+type ToolWithCalibration = Tools & {
   calibrationDate: Date;
   recDate: Date;
+  risk: number;
+  Calendar?: {
+    id: string;
+    isAccepted: boolean;
+    riskLevel: number;
+  } | null;
 };
-
-const mockData: data[] = [
-  {
-    id: 264988,
-    tooldesc: "Blade Micrometer",
-    model: "691-101A",
-    risk: 3,
-    calibrationDate: new Date("2026-10-12"),
-    recDate: new Date("2026-7-8"),
-  },
-  {
-    id: 267754,
-    tooldesc: "Dial Test Indicator",
-    model: "691-101A",
-    risk: 1,
-    calibrationDate: new Date("2026-10-12"),
-    recDate: new Date("2026-7-8"),
-  },
-  {
-    id: 126881,
-    tooldesc: "Digimatic Caliper",
-    model: "691-101A",
-    risk: 3,
-    calibrationDate: new Date("2026-10-12"),
-    recDate: new Date("2026-7-8"),
-  },
-  {
-    id: 2050302,
-    tooldesc: "Digital Caliper",
-    model: "691-101A",
-    risk: 2,
-    calibrationDate: new Date("2026-10-12"),
-    recDate: new Date("2026-7-8"),
-  },
-  {
-    id: 267755, // Fixed duplicate ID
-    tooldesc: "Micrometer Digital",
-    model: "691-101A",
-    risk: 3,
-    calibrationDate: new Date("2026-10-12"),
-    recDate: new Date("2026-7-8"),
-  },
-];
 
 // Dynamically import the Calendar component with SSR disabled
 const Calendar = dynamic(() => import("@/components/calendar/calendar"), {
@@ -77,75 +38,211 @@ const CalendarPage = () => {
   const [events, setEvents] = React.useState<CalendarEvent[]>(
     generateMockEvents()
   );
+  const [tools, setTools] = React.useState<ToolWithCalibration[]>([]);
+  const [loading, setLoading] = React.useState(true);
   const [mode, setMode] = React.useState<Mode>("month");
   const [date, setDate] = React.useState<Date>(new Date());
-  const [acceptedTools, setAcceptedTools] = React.useState<number[]>([]);
-  const [declinedTools, setDeclinedTools] = React.useState<number[]>([]);
+  const [acceptedTools, setAcceptedTools] = React.useState<string[]>([]);
+  const [declinedTools, setDeclinedTools] = React.useState<string[]>([]);
   const [animatingTools, setAnimatingTools] = React.useState<
     {
-      id: number;
+      id: string;
       status: "accepting" | "declining";
     }[]
   >([]);
 
-  // Function to add a calibration event to the calendar
-  const addCalibrationEvent = (tool: data) => {
-    // Mark this tool as animating for accept
-    setAnimatingTools((prev) => [
-      ...prev,
-      { id: tool.id, status: "accepting" },
-    ]);
+  // Fetch tools from the database
+  React.useEffect(() => {
+    const fetchTools = async () => {
+      try {
+        const response = await fetch("/api/tools");
+        if (!response.ok) {
+          throw new Error("Failed to fetch tools");
+        }
 
-    // Create a new event object
-    const newEvent: CalendarEvent = {
-      id: `tool-${tool.id}-${Date.now()}`, // Create a unique ID
-      title: `Calibrate: ${tool.tooldesc}`,
+        const data = await response.json();
+
+        // Process the tools to add calculated fields
+        const processedTools = data.map((tool: Tools) => {
+          // Parse dates from strings
+          const lastCalDate = tool.lastCalibration
+            ? new Date(tool.lastCalibration)
+            : new Date();
+
+          // Calculate recommended calibration date based on interval
+          // Default to 6 months if interval is not specified
+          const intervalMonths = tool.calibrationInterval
+            ? parseInt(tool.calibrationInterval)
+            : 6;
+
+          const recDate = new Date(lastCalDate);
+          recDate.setMonth(recDate.getMonth() + intervalMonths);
+
+          // Calculate risk level based on remaining months
+          let risk = 1; // Low risk by default
+          const remainingMonths = tool.remainingMonths
+            ? parseInt(tool.remainingMonths)
+            : 6;
+
+          if (remainingMonths <= 1) {
+            risk = 3; // High risk
+          } else if (remainingMonths <= 3) {
+            risk = 2; // Medium risk
+          }
+
+          return {
+            ...tool,
+            calibrationDate: lastCalDate,
+            recDate,
+            risk,
+          };
+        });
+
+        setTools(processedTools);
+
+        // Load existing calendar events
+        const calendarEvents = processedTools
+          .filter((tool) => tool.Calendar?.isAccepted)
+          .map((tool) => createCalendarEvent(tool));
+
+        setEvents((prev) => [...prev, ...calendarEvents]);
+
+        // Track which tools are already accepted
+        const accepted = processedTools
+          .filter((tool) => tool.Calendar?.isAccepted)
+          .map((tool) => tool.serialIdNo);
+
+        setAcceptedTools(accepted);
+      } catch (error) {
+        console.error("Error fetching tools:", error);
+        toast.error("Failed to load calibration data");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTools();
+  }, []);
+
+  // Create a calendar event from a tool
+  const createCalendarEvent = (tool: ToolWithCalibration): CalendarEvent => {
+    return {
+      id: `tool-${tool.serialIdNo}`,
+      title: `Calibrate: ${tool.description}`,
       color: getRiskColor(tool.risk),
-      start: new Date(tool.recDate),
+      start: tool.recDate,
       end: new Date(
         new Date(tool.recDate).setHours(new Date(tool.recDate).getHours() + 1)
       ), // 1 hour duration
-      description: `Tool ID: ${tool.id}, Model: ${tool.model}, Risk Level: ${tool.risk}`,
+      description: `Tool ID: ${tool.serialIdNo}, Model: ${
+        tool.modelPartNo || "N/A"
+      }, Risk Level: ${tool.risk}`,
     };
+  };
 
-    // Add the new event to the events array after animation completes
-    setTimeout(() => {
-      setEvents((prevEvents) => [...prevEvents, newEvent]);
+  // Function to add a calibration event to the calendar
+  const addCalibrationEvent = async (tool: ToolWithCalibration) => {
+    // Mark this tool as animating for accept
+    setAnimatingTools((prev) => [
+      ...prev,
+      { id: tool.serialIdNo, status: "accepting" },
+    ]);
 
-      // Mark this tool as accepted
-      setAcceptedTools((prev) => [...prev, tool.id]);
+    // Create a new event object
+    const newEvent = createCalendarEvent(tool);
 
-      // Set the calendar date to the recommended calibration date
-      setDate(new Date(tool.recDate));
-
-      // Show success notification
-      toast.success("Calibration event added", {
-        description: `${tool.tooldesc} scheduled for ${formatDate(
-          tool.recDate
-        )}`,
-        duration: 4000,
+    try {
+      // Save to database
+      const response = await fetch("/api/calendar", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          toolId: tool.serialIdNo,
+          isAccepted: true,
+          riskLevel: tool.risk,
+        }),
       });
-    }, 700);
+
+      if (!response.ok) {
+        throw new Error("Failed to save calendar event");
+      }
+
+      // Add the new event to the events array after animation completes
+      setTimeout(() => {
+        setEvents((prevEvents) => [...prevEvents, newEvent]);
+
+        // Mark this tool as accepted
+        setAcceptedTools((prev) => [...prev, tool.serialIdNo]);
+
+        // Set the calendar date to the recommended calibration date
+        setDate(new Date(tool.recDate));
+
+        // Show success notification
+        toast.success("Calibration event added", {
+          description: `${tool.description} scheduled for ${formatDate(
+            tool.recDate
+          )}`,
+          duration: 4000,
+        });
+      }, 700);
+    } catch (error) {
+      console.error("Error saving calendar event:", error);
+      toast.error("Failed to save calibration event");
+
+      // Remove from animating if there was an error
+      setAnimatingTools((prev) =>
+        prev.filter((item) => item.id !== tool.serialIdNo)
+      );
+    }
   };
 
   // Function to decline a tool calibration
-  const declineTool = (tool: data) => {
+  const declineTool = async (tool: ToolWithCalibration) => {
     // Mark this tool as animating for decline
     setAnimatingTools((prev) => [
       ...prev,
-      { id: tool.id, status: "declining" },
+      { id: tool.serialIdNo, status: "declining" },
     ]);
 
-    // Mark as declined after animation completes
-    setTimeout(() => {
-      setDeclinedTools((prev) => [...prev, tool.id]);
-
-      // Show info notification
-      toast.info("Calibration suggestion declined", {
-        description: `${tool.tooldesc} (ID: ${tool.id}) has been removed from suggestions`,
-        duration: 3000,
+    try {
+      // Save to database as declined
+      const response = await fetch("/api/calendar", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          toolId: tool.serialIdNo,
+          isAccepted: false,
+          riskLevel: tool.risk,
+        }),
       });
-    }, 700);
+
+      if (!response.ok) {
+        throw new Error("Failed to save declined status");
+      }
+
+      // Mark as declined after animation completes
+      setTimeout(() => {
+        setDeclinedTools((prev) => [...prev, tool.serialIdNo]);
+
+        // Show info notification
+        toast.info("Calibration suggestion declined", {
+          description: `${tool.description} (ID: ${tool.serialIdNo}) has been removed from suggestions`,
+          duration: 3000,
+        });
+      }, 700);
+    } catch (error) {
+      console.error("Error saving declined status:", error);
+      toast.error("Failed to decline calibration suggestion");
+
+      // Remove from animating if there was an error
+      setAnimatingTools((prev) =>
+        prev.filter((item) => item.id !== tool.serialIdNo)
+      );
+    }
   };
 
   // Helper function to map risk level to color
@@ -169,25 +266,28 @@ const CalendarPage = () => {
 
   // Filter out tools that have been accepted or declined
   const filteredTools = React.useMemo(() => {
-    return mockData.filter(
+    return tools.filter(
       (tool) =>
-        !acceptedTools.includes(tool.id) &&
-        !declinedTools.includes(tool.id) &&
-        !animatingTools.some((item) => item.id === tool.id)
+        !acceptedTools.includes(tool.serialIdNo) &&
+        !declinedTools.includes(tool.serialIdNo) &&
+        !animatingTools.some((item) => item.id === tool.serialIdNo) &&
+        !tool.Calendar?.isAccepted
     );
-  }, [acceptedTools, declinedTools, animatingTools]);
+  }, [tools, acceptedTools, declinedTools, animatingTools]);
 
   // Get tools that are currently animating
   const animatingToolsData = React.useMemo(() => {
     return animatingTools
       .map((animTool) => {
-        const toolData = mockData.find((tool) => tool.id === animTool.id);
-        return { ...toolData, animationStatus: animTool.status };
+        const toolData = tools.find((tool) => tool.serialIdNo === animTool.id);
+        return toolData
+          ? { ...toolData, animationStatus: animTool.status }
+          : null;
       })
-      .filter(Boolean) as (data & {
+      .filter(Boolean) as (ToolWithCalibration & {
       animationStatus: "accepting" | "declining";
     })[];
-  }, [animatingTools]);
+  }, [animatingTools, tools]);
 
   return (
     <div className="">
@@ -202,58 +302,65 @@ const CalendarPage = () => {
           </CardHeader>
           <ScrollArea className="w-full h-full pb-20">
             <CardContent className="gap-4 flex flex-col">
-              <AnimatePresence>
-                {/* Animating tools */}
-                {animatingToolsData.map((tool) => (
-                  <motion.div
-                    key={`animating-${tool.id}`}
-                    className="p-4 border rounded-lg bg-white shadow-md space-y-2"
-                    initial={{ opacity: 1, x: 0 }}
-                    animate={
-                      tool.animationStatus === "accepting"
-                        ? { opacity: 0, x: 100, backgroundColor: "#d1fae5" }
-                        : { opacity: 0, x: -100, backgroundColor: "#fee2e2" }
-                    }
-                    exit={{
-                      opacity: 0,
-                      height: 0,
-                      marginBottom: 0,
-                      padding: 0,
-                    }}
-                    transition={{ duration: 0.7, ease: "easeInOut" }}
-                    onAnimationComplete={() => {
-                      // Remove from animating list after animation completes
-                      setTimeout(() => {
-                        setAnimatingTools((prev) =>
-                          prev.filter((item) => item.id !== tool.id)
-                        );
-                      }, 100);
-                    }}
-                  >
-                    {renderCardContent(tool, formatDate)}
-                  </motion.div>
-                ))}
+              {loading ? (
+                <div className="text-center py-8 text-gray-500">
+                  Loading calibration suggestions...
+                </div>
+              ) : (
+                <AnimatePresence>
+                  {/* Animating tools */}
+                  {animatingToolsData.map((tool) => (
+                    <motion.div
+                      key={`animating-${tool.serialIdNo}`}
+                      className="p-4 border rounded-lg bg-white shadow-md space-y-2"
+                      initial={{ opacity: 1, x: 0 }}
+                      animate={
+                        tool.animationStatus === "accepting"
+                          ? { opacity: 0, x: 100, backgroundColor: "#d1fae5" }
+                          : { opacity: 0, x: -100, backgroundColor: "#fee2e2" }
+                      }
+                      exit={{
+                        opacity: 0,
+                        height: 0,
+                        marginBottom: 0,
+                        padding: 0,
+                      }}
+                      transition={{ duration: 0.7, ease: "easeInOut" }}
+                      onAnimationComplete={() => {
+                        // Remove from animating list after animation completes
+                        setTimeout(() => {
+                          setAnimatingTools((prev) =>
+                            prev.filter((item) => item.id !== tool.serialIdNo)
+                          );
+                        }, 100);
+                      }}
+                    >
+                      {renderCardContent(tool, formatDate)}
+                    </motion.div>
+                  ))}
 
-                {/* Regular tools */}
-                {filteredTools.map((tool) => (
-                  <motion.div
-                    key={`tool-${tool.id}`}
-                    className="p-4 border rounded-lg bg-white shadow-md space-y-2"
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    {renderCardContent(
-                      tool,
-                      formatDate,
-                      () => addCalibrationEvent(tool),
-                      () => declineTool(tool)
-                    )}
-                  </motion.div>
-                ))}
-              </AnimatePresence>
+                  {/* Regular tools */}
+                  {filteredTools.map((tool) => (
+                    <motion.div
+                      key={`tool-${tool.serialIdNo}`}
+                      className="p-4 border rounded-lg bg-white shadow-md space-y-2"
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.3 }}
+                    >
+                      {renderCardContent(
+                        tool,
+                        formatDate,
+                        () => addCalibrationEvent(tool),
+                        () => declineTool(tool)
+                      )}
+                    </motion.div>
+                  ))}
+                </AnimatePresence>
+              )}
 
-              {filteredTools.length === 0 &&
+              {!loading &&
+                filteredTools.length === 0 &&
                 animatingToolsData.length === 0 && (
                   <div className="text-center py-8 text-gray-500">
                     No pending calibration suggestions
@@ -286,7 +393,7 @@ const riskColors: Record<number, string> = {
 
 // Function to render the card content
 const renderCardContent = (
-  data: data,
+  data: ToolWithCalibration,
   formatDate: (date: Date) => string,
   onAccept?: () => void,
   onDecline?: () => void
@@ -295,9 +402,9 @@ const renderCardContent = (
     <>
       <div className="flex justify-between items-center">
         <div>
-          <p className="font-semibold text-lg">{data.tooldesc}</p>
+          <p className="font-semibold text-lg">{data.description}</p>
           <p className="text-sm text-gray-500">
-            ID: {data.id} | Model: {data.model}
+            ID: {data.serialIdNo} | Model: {data.modelPartNo || "N/A"}
           </p>
         </div>
         <div
@@ -311,7 +418,7 @@ const renderCardContent = (
 
       <div className="text-sm text-gray-700 space-y-1">
         <p>
-          <span className="font-medium">Calibration Date:</span>{" "}
+          <span className="font-medium">Last Calibration:</span>{" "}
           {formatDate(data.calibrationDate)}
         </p>
         <div>

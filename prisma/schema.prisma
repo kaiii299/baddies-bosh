@@ -38,13 +38,11 @@ model Tools {
 }
 
 model Calendar {
-  id         String  @id @default(uuid())
-  toolId     String  @unique // Foreign key to Tool table
-  isAccepted Boolean @default(false) // Whether the event was accepted in the calendar
-  riskLevel  Int // Risk level (1, 2, 3)
+  id                       String  @id @default(uuid())  
+  serialIdNo               String  @unique @map("serialIdNo") // FK to Tools.serialIdNo
+  predictedCalibrationDate String  @default("") @map("predictedCalibrationDate")
+  riskLevel                Int     @default(1) @map("riskLevel")
+  isAccepted               Boolean @default(false) @map("isAccepted")
 
-  tools Tools @relation(fields: [toolId], references: [serialIdNo], onDelete: Cascade)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  Tools                    Tools   @relation(fields: [serialIdNo], references: [serialIdNo])
 }
