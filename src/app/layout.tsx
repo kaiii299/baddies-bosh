@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
-import { NavBar } from "@/components/NavBar";
+// import { NavBar } from "@/components/NavBar";
 import { SidebarComponent } from "@/components/sidebarComponent";
 import { Toaster } from "@/components/ui/sonner";
 
