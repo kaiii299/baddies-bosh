@@ -7,7 +7,7 @@ import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
+  //   CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -81,14 +81,14 @@ const CalendarPage = () => {
   return (
     <div className="">
       <div className="flex gap-4 flex-col mb-6">
-        <Card className="">
+        <Card className="h-[500px] overflow-hidden">
           <CardHeader>
             <CardTitle>Suggested days to calibrate tools</CardTitle>
             <CardDescription>
               Based on previous calibration data
             </CardDescription>
           </CardHeader>
-          <ScrollArea>
+          <ScrollArea className="w-full h-full pb-20">
             <CardContent className="gap-4 flex flex-col">
               {mockData.map((data: data, index) => (
                 <React.Fragment key={index}>{listCard(data)}</React.Fragment>
@@ -124,13 +124,18 @@ const CalendarPage = () => {
   );
 };
 
-const riskColors: any = {
+const riskColors: Record<number, string> = {
   1: "bg-green-500 text-white", // Low risk
   2: "bg-yellow-500 text-black", // Medium risk
   3: "bg-red-500 text-white", // High risk
 };
 
 const listCard = (data: data) => {
+  // Format dates consistently to avoid hydration errors
+  const formatDate = (date: Date): string => {
+    return `${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear()}`;
+  };
+
   return (
     <div className="p-4 border rounded-lg bg-white shadow-md space-y-2">
       <div className="flex justify-between items-center">
@@ -152,14 +157,14 @@ const listCard = (data: data) => {
       <div className="text-sm text-gray-700 space-y-1">
         <p>
           <span className="font-medium">Calibration Date:</span>{" "}
-          {data.calibrationDate.toLocaleDateString()}
+          {formatDate(data.calibrationDate)}
         </p>
         <div>
           <span className="font-medium">Recommended Calibration Date:</span>{" "}
-          {data.recDate.toLocaleDateString()}
+          {formatDate(data.recDate)}
           <div className="flex justify-end gap-3">
-            <Button>Accept</Button>
-            <Button variant={"destructive"}>Decline</Button>
+            <Button variant={"secondary"}>Decline</Button>
+            <Button className="bg-green-500">Accept</Button>
           </div>
         </div>
       </div>
