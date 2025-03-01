@@ -1,13 +1,10 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
-import {
-  SidebarProvider,
-  SidebarTrigger,
-} from "@/components/ui/sidebar";
+import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { NavBar } from "@/components/NavBar";
 import { SidebarComponent } from "@/components/sidebarComponent";
-import { Toaster } from "@/components/ui/sonner"
+import { Toaster } from "@/components/ui/sonner";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -32,7 +29,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className="w-screen">
+      <body className={`w-screen ${geistSans.variable} ${geistMono.variable}`}>
         <SidebarProvider>
           <SidebarComponent />
           <div className="fixed top-4 left-4 z-50 md:hidden">
@@ -42,10 +39,9 @@ export default function RootLayout({
             {/* <div>
               <NavBar />
             </div> */}
-            <div className="my-10">
-              {children}
-            </div>
+            <div className="my-10">{children}</div>
           </div>
+          <Toaster position="top-right" />
         </SidebarProvider>
       </body>
     </html>

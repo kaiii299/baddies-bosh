@@ -13,6 +13,8 @@ import {
 } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
+import { motion, AnimatePresence } from "framer-motion";
+import { toast } from "sonner";
 
 type data = {
   id: number;
@@ -57,7 +59,7 @@ const mockData: data[] = [
     recDate: new Date("2026-7-8"),
   },
   {
-    id: 267754,
+    id: 267755, // Fixed duplicate ID
     tooldesc: "Micrometer Digital",
     model: "691-101A",
     risk: 3,
@@ -78,9 +80,22 @@ const CalendarPage = () => {
   const [mode, setMode] = React.useState<Mode>("month");
   const [date, setDate] = React.useState<Date>(new Date());
   const [acceptedTools, setAcceptedTools] = React.useState<number[]>([]);
+  const [declinedTools, setDeclinedTools] = React.useState<number[]>([]);
+  const [animatingTools, setAnimatingTools] = React.useState<
+    {
+      id: number;
+      status: "accepting" | "declining";
+    }[]
+  >([]);
 
   // Function to add a calibration event to the calendar
   const addCalibrationEvent = (tool: data) => {
+    // Mark this tool as animating for accept
+    setAnimatingTools((prev) => [
+      ...prev,
+      { id: tool.id, status: "accepting" },
+    ]);
+
     // Create a new event object
     const newEvent: CalendarEvent = {
       id: `tool-${tool.id}-${Date.now()}`, // Create a unique ID
@@ -93,14 +108,44 @@ const CalendarPage = () => {
       description: `Tool ID: ${tool.id}, Model: ${tool.model}, Risk Level: ${tool.risk}`,
     };
 
-    // Add the new event to the events array
-    setEvents((prevEvents) => [...prevEvents, newEvent]);
+    // Add the new event to the events array after animation completes
+    setTimeout(() => {
+      setEvents((prevEvents) => [...prevEvents, newEvent]);
 
-    // Mark this tool as accepted
-    setAcceptedTools((prev) => [...prev, tool.id]);
+      // Mark this tool as accepted
+      setAcceptedTools((prev) => [...prev, tool.id]);
 
-    // Set the calendar date to the recommended calibration date
-    setDate(new Date(tool.recDate));
+      // Set the calendar date to the recommended calibration date
+      setDate(new Date(tool.recDate));
+
+      // Show success notification
+      toast.success("Calibration event added", {
+        description: `${tool.tooldesc} scheduled for ${formatDate(
+          tool.recDate
+        )}`,
+        duration: 4000,
+      });
+    }, 700);
+  };
+
+  // Function to decline a tool calibration
+  const declineTool = (tool: data) => {
+    // Mark this tool as animating for decline
+    setAnimatingTools((prev) => [
+      ...prev,
+      { id: tool.id, status: "declining" },
+    ]);
+
+    // Mark as declined after animation completes
+    setTimeout(() => {
+      setDeclinedTools((prev) => [...prev, tool.id]);
+
+      // Show info notification
+      toast.info("Calibration suggestion declined", {
+        description: `${tool.tooldesc} (ID: ${tool.id}) has been removed from suggestions`,
+        duration: 3000,
+      });
+    }, 700);
   };
 
   // Helper function to map risk level to color
@@ -117,6 +162,33 @@ const CalendarPage = () => {
     }
   };
 
+  // Format dates consistently to avoid hydration errors
+  const formatDate = (date: Date): string => {
+    return `${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear()}`;
+  };
+
+  // Filter out tools that have been accepted or declined
+  const filteredTools = React.useMemo(() => {
+    return mockData.filter(
+      (tool) =>
+        !acceptedTools.includes(tool.id) &&
+        !declinedTools.includes(tool.id) &&
+        !animatingTools.some((item) => item.id === tool.id)
+    );
+  }, [acceptedTools, declinedTools, animatingTools]);
+
+  // Get tools that are currently animating
+  const animatingToolsData = React.useMemo(() => {
+    return animatingTools
+      .map((animTool) => {
+        const toolData = mockData.find((tool) => tool.id === animTool.id);
+        return { ...toolData, animationStatus: animTool.status };
+      })
+      .filter(Boolean) as (data & {
+      animationStatus: "accepting" | "declining";
+    })[];
+  }, [animatingTools]);
+
   return (
     <div className="">
       <div className="flex gap-4 flex-col mb-6">
@@ -129,20 +201,65 @@ const CalendarPage = () => {
           </CardHeader>
           <ScrollArea className="w-full h-full pb-20">
             <CardContent className="gap-4 flex flex-col">
-              {mockData.map((data: data, index) => (
-                <React.Fragment key={index}>
-                  {listCard(
-                    data,
-                    addCalibrationEvent,
-                    acceptedTools.includes(data.id)
-                  )}
-                </React.Fragment>
-              ))}
+              <AnimatePresence>
+                {/* Animating tools */}
+                {animatingToolsData.map((tool) => (
+                  <motion.div
+                    key={`animating-${tool.id}`}
+                    className="p-4 border rounded-lg bg-white shadow-md space-y-2"
+                    initial={{ opacity: 1, x: 0 }}
+                    animate={
+                      tool.animationStatus === "accepting"
+                        ? { opacity: 0, x: 100, backgroundColor: "#d1fae5" }
+                        : { opacity: 0, x: -100, backgroundColor: "#fee2e2" }
+                    }
+                    exit={{
+                      opacity: 0,
+                      height: 0,
+                      marginBottom: 0,
+                      padding: 0,
+                    }}
+                    transition={{ duration: 0.7, ease: "easeInOut" }}
+                    onAnimationComplete={() => {
+                      // Remove from animating list after animation completes
+                      setTimeout(() => {
+                        setAnimatingTools((prev) =>
+                          prev.filter((item) => item.id !== tool.id)
+                        );
+                      }, 100);
+                    }}
+                  >
+                    {renderCardContent(tool, formatDate)}
+                  </motion.div>
+                ))}
+
+                {/* Regular tools */}
+                {filteredTools.map((tool) => (
+                  <motion.div
+                    key={`tool-${tool.id}`}
+                    className="p-4 border rounded-lg bg-white shadow-md space-y-2"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    {renderCardContent(
+                      tool,
+                      formatDate,
+                      () => addCalibrationEvent(tool),
+                      () => declineTool(tool)
+                    )}
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+
+              {filteredTools.length === 0 &&
+                animatingToolsData.length === 0 && (
+                  <div className="text-center py-8 text-gray-500">
+                    No pending calibration suggestions
+                  </div>
+                )}
             </CardContent>
           </ScrollArea>
-          {/* <CardFooter>
-            <p>Card Footer</p>
-          </CardFooter> */}
         </Card>
       </div>
 
@@ -166,18 +283,15 @@ const riskColors: Record<number, string> = {
   3: "bg-red-500 text-white", // High risk
 };
 
-const listCard = (
+// Function to render the card content
+const renderCardContent = (
   data: data,
-  onAccept: (data: data) => void,
-  isAccepted: boolean
+  formatDate: (date: Date) => string,
+  onAccept?: () => void,
+  onDecline?: () => void
 ) => {
-  // Format dates consistently to avoid hydration errors
-  const formatDate = (date: Date): string => {
-    return `${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear()}`;
-  };
-
   return (
-    <div className="p-4 border rounded-lg bg-white shadow-md space-y-2">
+    <>
       <div className="flex justify-between items-center">
         <div>
           <p className="font-semibold text-lg">{data.tooldesc}</p>
@@ -202,19 +316,19 @@ const listCard = (
         <div>
           <span className="font-medium">Recommended Calibration Date:</span>{" "}
           {formatDate(data.recDate)}
-          <div className="flex justify-end gap-3">
-            <Button variant={"secondary"}>Decline</Button>
-            <Button
-              className={isAccepted ? "bg-gray-400" : "bg-green-500"}
-              onClick={() => !isAccepted && onAccept(data)}
-              disabled={isAccepted}
-            >
-              {isAccepted ? "Added" : "Accept"}
-            </Button>
-          </div>
+          {onAccept && onDecline && (
+            <div className="flex justify-end gap-3">
+              <Button variant={"secondary"} onClick={onDecline}>
+                Decline
+              </Button>
+              <Button className="bg-green-500" onClick={onAccept}>
+                Accept
+              </Button>
+            </div>
+          )}
         </div>
       </div>
-    </div>
+    </>
   );
 };
 
