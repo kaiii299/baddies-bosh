@@ -4,7 +4,7 @@ import React from 'react'
 async function getTools() {
   try {
     // Use absolute URL in development
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
+    const baseUrl = "baddies-bosh.vercel.app";
     const res = await fetch(`${baseUrl}/api/tools`, {
       cache: 'no-store',
       headers: {
