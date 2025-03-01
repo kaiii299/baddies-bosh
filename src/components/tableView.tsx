@@ -182,6 +182,7 @@ export function DataTableDemo({ initialData = [] }: DataTableDemoProps) {
 
   return (
     <div className="w-full">
+      <h2 className="text-2xl font-bold ">Tables</h2>
       <div className="flex items-center py-4 gap-3">
         <Input
           placeholder="Search description..."
@@ -235,9 +236,9 @@ export function DataTableDemo({ initialData = [] }: DataTableDemoProps) {
                     {header.isPlaceholder
                       ? null
                       : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
-                        )}
+                        header.column.columnDef.header,
+                        header.getContext()
+                      )}
                   </TableHead>
                 ))}
               </TableRow>

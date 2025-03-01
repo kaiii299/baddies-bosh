@@ -17,7 +17,6 @@ async function getTools() {
     }
 
     const data = await res.json();
-    console.log('Fetched tools:', data); // Debug log
     return data;
   } catch (error) {
     console.error('Error loading tools:', error);
@@ -27,9 +26,6 @@ async function getTools() {
 
 export default async function ToolsPage() {
   const tools = await getTools();
-  
-  // Debug log
-  console.log('Tools passed to DataTableDemo:', tools);
 
   return (
     <div className="w-full">

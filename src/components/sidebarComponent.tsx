@@ -9,6 +9,8 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarHeader,
+  SidebarFooter,
 } from "@/components/ui/sidebar";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
@@ -16,12 +18,9 @@ import { cn } from "@/lib/utils";
 
 import {
   Calendar,
-  File,
   Home,
-  Settings,
-  Settings2,
   Table2,
-  UserRound,
+  LogOut,
 } from "lucide-react";
 
 // Menu items.
@@ -37,20 +36,20 @@ const items = [
     icon: Calendar,
   },
   {
-    title: "Table",
-    url: "/tools",
+    title: "Tables",
+    url: "/tables",
     icon: Table2,
   },
-  {
-    title: "Settings",
-    url: "/settings",
-    icon: Settings2,
-  },
-  {
-    title: "Profile",
-    url: "/profile",
-    icon: UserRound,
-  },
+  // {
+  //   title: "Settings",
+  //   url: "/settings",
+  //   icon: Settings2,
+  // },
+  // {
+  //   title: "Profile",
+  //   url: "/profile",
+  //   icon: UserRound,
+  // },
 ];
 
 export function SidebarComponent() {
@@ -61,9 +60,14 @@ export function SidebarComponent() {
       collapsible="offcanvas" 
       className="hidden md:flex"
     >
+      <SidebarHeader className="h-10 flex items-center  border-b">
+        <div className="flex items-end justify-end">
+          <span className="font-bold text-lg">Baddie Bosch</span>
+        </div>
+      </SidebarHeader>
+      
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Application</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {items.map((item) => {
@@ -98,6 +102,20 @@ export function SidebarComponent() {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
+      
+      <SidebarFooter className="border-t p-4">
+        <div className="flex flex-col gap-4">
+          <div className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition cursor-pointer">
+            {/* <LogOut className="h-4 w-4" /> */}
+            {/* <span>Logout</span> */}
+          </div>
+          <div className="text-xs text-muted-foreground">
+            © {new Date().getFullYear()} BaddieBosch
+            <br />
+            All rights reserved.
+          </div>
+        </div>
+      </SidebarFooter>
     </Sidebar>
   );
 }
