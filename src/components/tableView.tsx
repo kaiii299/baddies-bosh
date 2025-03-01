@@ -13,7 +13,7 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { ArrowUpDown, ChevronDown, MoreHorizontal, Plus } from "lucide-react";
+import { ChevronDown, MoreHorizontal, Plus } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -38,55 +38,21 @@ import {
 import { useRouter } from "next/navigation";
 import { DialogComponent } from "./dialogComponent";
 
-const data: Payment[] = [
-  {
-    id: "m5gr84i9",
-    amount: 316,
-    status: "success",
-    email: "ken99@example.com",
-  },
-  {
-    id: "3u1reuv4",
-    amount: 242,
-    status: "success",
-    email: "Abe45@example.com",
-  },
-  {
-    id: "derv1ws0",
-    amount: 837,
-    status: "processing",
-    email: "Monserrat44@example.com",
-  },
-  {
-    id: "5kma53ae",
-    amount: 874,
-    status: "success",
-    email: "Silas22@example.com",
-  },
-  {
-    id: "bhqecj4p",
-    amount: 721,
-    status: "failed",
-    email: "carmella@example.com",
-  },
-];
-
-export type Payment = {
-  id: string;
-  amount: number;
-  status: "pending" | "processing" | "success" | "failed";
-  email: string;
+export type ToolData = {
+  serialIdNo: string;
+  div?: string;
+  brand: string;
+  description: string;
+  modelPartNo?: string;
+  lastCalibration?: string;
 };
 
-export const columns: ColumnDef<Payment>[] = [
+export const columns: ColumnDef<ToolData>[] = [
   {
     id: "select",
     header: ({ table }) => (
       <Checkbox
-        checked={
-          table.getIsAllPageRowsSelected() ||
-          (table.getIsSomePageRowsSelected() && "indeterminate")
-        }
+        checked={table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && "indeterminate")}
         onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
         aria-label="Select all"
       />
@@ -102,101 +68,80 @@ export const columns: ColumnDef<Payment>[] = [
     enableHiding: false,
   },
   {
+    accessorKey: "serialIdNo",
+    header: "Serial ID",
+    cell: ({ row }) => (
+      <div className="capitalize">
+        {row.getValue("serialIdNo") ?? "Null"}
+      </div>
+    ),
+  },
+  {
+    accessorKey: "div",
+    header: "Division",
+    cell: ({ row }) => (
+      <div className="capitalize">
+        {row.getValue("div") ?? "Null"}
+      </div>
+    ),
+  },
+  {
+    accessorKey: "brand",
+    header: "Brand",
+    cell: ({ row }) => (
+      <div className="capitalize">
+        {row.getValue("brand") ?? "Null"}
+      </div>
+    ),
+  },
+  {
     accessorKey: "description",
     header: "Description",
     cell: ({ row }) => (
-      <div className="capitalize">{row.getValue("status")}</div>
+      <div className="capitalize">
+        {row.getValue("description") ?? "Null"}
+      </div>
     ),
   },
   {
-    accessorKey: "Make",
-    header: "Make",
+    accessorKey: "modelPartNo",
+    header: "Model/Part No",
     cell: ({ row }) => (
-      <div className="capitalize">{row.getValue("status")}</div>
+      <div className="capitalize">
+        {row.getValue("modelPartNo") ?? "Null"}
+      </div>
     ),
   },
   {
-    accessorKey: "Model",
-    header: "Model",
+    accessorKey: "lastCalibration",
+    header: "Last Calibration",
     cell: ({ row }) => (
-      <div className="capitalize">{row.getValue("status")}</div>
+      <div className="capitalize">
+        {row.getValue("lastCalibration") ?? "Null"}
+      </div>
     ),
   },
-  {
-    accessorKey: "Serial",
-    header: "Serial",
-    cell: ({ row }) => (
-      <div className="capitalize">{row.getValue("status")}</div>
-    ),
-  },
-  {
-    accessorKey: "Last calibration",
-    header: "Last calibration",
-    cell: ({ row }) => (
-      <div className="capitalize">{row.getValue("status")}</div>
-    ),
-  },
-  {
-    accessorKey: "Calibration due",
-    header: "Calibration due",
-    cell: ({ row }) => (
-      <div className="capitalize">{row.getValue("status")}</div>
-    ),
-  },
-  // {
-  //     accessorKey: "email",
-  //     header: ({ column }) => {
-  //         return (
-  //             <Button
-  //                 variant="ghost"
-  //                 onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-  //             >
-  //                 Email
-  //                 <ArrowUpDown />
-  //             </Button>
-  //         )
-  //     },
-  //     cell: ({ row }) => <div className="lowercase">{row.getValue("email")}</div>,
-  // },
-  //   {
-  //     accessorKey: "amount",
-  //     header: () => <div className="text-right">Amount</div>,
-  //     cell: ({ row }) => {
-  //       const amount = parseFloat(row.getValue("amount"));
-
-  //       // Format the amount as a dollar amount
-  //       const formatted = new Intl.NumberFormat("en-US", {
-  //         style: "currency",
-  //         currency: "USD",
-  //       }).format(amount);
-
-  //       return <div className="text-right font-medium">{formatted}</div>;
-  //     },
-  //   },
   {
     id: "actions",
     enableHiding: false,
     cell: ({ row }) => {
-      const payment = row.original;
-
+      const tool = row.original;
       return (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-full p-0">
+            <Button variant="ghost" className="h-8 w-8 p-0">
               <span className="sr-only">Open menu</span>
-              <MoreHorizontal />
+              <MoreHorizontal className="h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
-            <DropdownMenuItem
-              onClick={() => navigator.clipboard.writeText(payment.id)}
-            >
-              Copy payment ID
+            <DropdownMenuItem onClick={() => navigator.clipboard.writeText(tool.serialIdNo)}>
+              Copy Serial ID
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>View customer</DropdownMenuItem>
-            <DropdownMenuItem>View payment details</DropdownMenuItem>
+            <DropdownMenuItem>View details</DropdownMenuItem>
+            <DropdownMenuItem>Edit tool</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       );
@@ -204,17 +149,18 @@ export const columns: ColumnDef<Payment>[] = [
   },
 ];
 
-export function DataTableDemo() {
+interface DataTableDemoProps {
+  initialData?: ToolData[];
+}
+
+export function DataTableDemo({ initialData = [] }: DataTableDemoProps) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
-  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
-    []
-  );
-  const [columnVisibility, setColumnVisibility] =
-    React.useState<VisibilityState>({});
+  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
+  const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = React.useState({});
 
   const table = useReactTable({
-    data,
+    data: initialData,
     columns,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
@@ -238,10 +184,10 @@ export function DataTableDemo() {
     <div className="w-full">
       <div className="flex items-center py-4 gap-3">
         <Input
-          placeholder="Search name..."
-          value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
+          placeholder="Search description..."
+          value={(table.getColumn("description")?.getFilterValue() as string) ?? ""}
           onChange={(event) =>
-            table.getColumn("name")?.setFilterValue(event.target.value)
+            table.getColumn("description")?.setFilterValue(event.target.value)
           }
           className=""
         />
@@ -275,7 +221,7 @@ export function DataTableDemo() {
         <DialogComponent>
           <Button>
             <Plus />
-            New data
+            New Tool
           </Button>
         </DialogComponent>
       </div>
@@ -303,7 +249,7 @@ export function DataTableDemo() {
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
-                  onClick={() => router.push(`/tools/${row.original.id}`)} // Navigate to `/tools/{id}`
+                  onClick={() => router.push(`/tools/${row.original.serialIdNo}`)}
                   className="cursor-pointer hover:bg-muted transition"
                 >
                   {row.getVisibleCells().map((cell) => (
@@ -319,10 +265,10 @@ export function DataTableDemo() {
             ) : (
               <TableRow>
                 <TableCell
-                  colSpan={table.getAllColumns().length}
+                  colSpan={columns.length}
                   className="h-24 text-center"
                 >
-                  No results.
+                  No tools found.
                 </TableCell>
               </TableRow>
             )}
