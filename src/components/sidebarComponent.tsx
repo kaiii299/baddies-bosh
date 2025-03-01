@@ -87,13 +87,7 @@ export function SidebarComponent() {
                     <SidebarMenuButton asChild>
                       <Link
                         href={item.url}
-                        className={cn(
-                          "flex items-center gap-3 rounded-lg px-3 py-3",
-                          // Apply different styles based on active state
-                          isActive
-                            ? "bg-pink-600 hover:bg-pink-700"
-                            : "hover:bg-stone-100"
-                        )}
+                        className={`${isActive ? "bg-pink-600" : "hover:bg-sidebar-accent"}`}
                       >
                         {/* Icon with conditional styling */}
                         <item.icon

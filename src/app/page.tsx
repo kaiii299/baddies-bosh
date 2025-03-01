@@ -1,7 +1,6 @@
 import Dashboard from "@/components/Home/dashboard";
 import React from "react";
 
-
 const page = async () => {
 
   async function getToolsData() {
