@@ -262,7 +262,7 @@ export default function BaddiesAIPage() {
   return (
     <div className="flex flex-col h-[calc(100vh-150px)]">
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-2xl font-bold">Baddies AI - Tool Assistant</h2>
+        <h2 className="text-2xl font-bold">Baddies AI - Tool Assistant <span className="text-sm text-slate-400">(using N8N as RAG)</span></h2>
         {/* <Button 
           variant="outline" 
           size="sm" 
