@@ -35,7 +35,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useRouter } from "next/navigation";  
+import { useRouter } from "next/navigation";
+import { DialogComponent } from "./dialogComponent";
 
 const data: Payment[] = [
   {
@@ -270,10 +271,13 @@ export function DataTableDemo() {
               })}
           </DropdownMenuContent>
         </DropdownMenu>
-        <Button>
-          <Plus />
-          New data
-        </Button>
+
+        <DialogComponent>
+          <Button>
+            <Plus />
+            New data
+          </Button>
+        </DialogComponent>
       </div>
       <div className="rounded-md border">
         <Table>
