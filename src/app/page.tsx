@@ -1,9 +1,8 @@
 import Dashboard from "@/components/Home/dashboard";
 import React from "react";
 
-type Props = {};
 
-const page = async (props: Props) => {
+const page = async () => {
 
   async function getToolsData() {
     try {

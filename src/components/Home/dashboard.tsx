@@ -11,7 +11,7 @@ import { Tools } from "@prisma/client"
 // Fetch data from the API
 
 type props ={
-  tools: any
+  tools: []
 }
 
 export default function Dashboard({tools}: props) {
