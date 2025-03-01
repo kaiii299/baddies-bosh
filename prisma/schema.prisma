@@ -9,13 +9,30 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
-model User {
-  id        String   @id @default(uuid())
-  email     String   @unique
-  name      String?
-  createdAt DateTime @default(now())
+model Tools {
+  id                   String   @id @default(uuid())
+  division             String?  // "Div."
+  description          String?  // "Description"
+  standard             String?  // "Standard"
+  category             String?  // "Category"
+  brand                String?  // "Brand (Make)"
+  tag                  String?  // "Tag"
+  modelPartNo          String?  // "Model/Part No"
+  serialIdNo           String?  // "Serial / Id no"
+  range                String?  // "Range"
+  toleranceLimit       String?  // "Tolerence Limit"
+  internalLimit        String?  // "Unnamed: 10" (you can rename this to something meaningful like `internalLimit`)
+  inUse                 Boolean? // "In USE?\n(Y=Yes;\n N=No)"
+  calibrationInterval   Int?     // "Actual\nCalibration\nInterval\n(No. of Yr)"
+  lastCalibration       DateTime? // "Last \nCalibration"
+  calibrationDue        DateTime? // "Calibration \nDue"
+  remainingMonths       Int?     // "Remaining mths before Calibration due date"
+  externalCal           String?  // "1. External Cal:\n In-House / Lab"
+  calibrationReportNo   String?  // "Calibration Report\nNumber"
+  calibrator            String?  // "Calibrator"
+  pic                   String?  // "P.I.C."
+  renewalAction         String?  // "Action for Renewal Reminder"
+
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
 }
-
-
-
-
