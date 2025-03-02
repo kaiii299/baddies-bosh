@@ -1,6 +1,6 @@
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import {
   BarChart,
   Bar,
@@ -12,25 +12,11 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
+  Legend,
+  AreaChart,
+  Area,
 } from "recharts";
-
-// Updated to match your actual schema
-type ToolData = {
-  serialIdNo: string;
-  div?: string;
-  description: string;
-  standard?: string;
-  category?: string;
-  brand: string;
-  tag?: string;
-  modelPartNo?: string;
-  range?: string;
-  inUse: string;
-  calibrationInterval?: string;
-  lastCalibration?: string;
-  calibrationDue?: string;
-  remainingMonths?: string;
-};
+import { Progress } from "@/components/ui/progress";
 
 interface ChartProps {
   tools: ToolData[];
@@ -71,17 +57,22 @@ export function DashboardCharts({ tools }: ChartProps) {
   const statusData = Object.entries(statusCounts)
     .map(([name, value]) => ({ name, value }));
 
-  // Process category data
-  const categoryCounts = tools.reduce((acc, tool) => {
-    const category = tool.category || 'Uncategorized';
-    acc[category] = (acc[category] || 0) + 1;
+  // Process calibrator data
+  const calibratorCounts = tools.reduce((acc, tool) => {
+    // Use a sensible default for categorization
+    const calibrator = tool.calibrator || (tool.standard || 'Other');
+    if (calibrator.trim()) {
+      acc[calibrator] = (acc[calibrator] || 0) + 1;
+    }
     return acc;
   }, {} as Record<string, number>);
 
-  const categoryData = Object.entries(categoryCounts)
+  // Convert calibrator data for area chart
+  const calibratorData = Object.entries(calibratorCounts)
+    .filter(([name]) => name !== 'Uncategorized') // Remove uncategorized from display
     .map(([name, value]) => ({ name, value }))
     .sort((a, b) => b.value - a.value)
-    .slice(0, 6); // Top 6 categories
+    .slice(0, 8); // Show top 8 calibrators
 
   // Process calibration interval data
   const intervalCounts = tools.reduce((acc, tool) => {
@@ -94,11 +85,90 @@ export function DashboardCharts({ tools }: ChartProps) {
     .map(([name, value]) => ({ name, value }))
     .sort((a, b) => b.value - a.value);
 
+  // Process calibration status data
+  const getCalibrationStatus = (tool: ToolData) => {
+    if (!tool.remainingMonths) return 'Unknown';
+    
+    const months = parseInt(tool.remainingMonths);
+    if (isNaN(months)) return 'Unknown';
+    
+    if (months < 0) return 'Overdue';
+    if (months <= 2) return 'Drifting';
+    return 'Optimal';
+  };
+  
+  const calibrationStatusCounts = tools.reduce((acc, tool) => {
+    const status = getCalibrationStatus(tool);
+    acc[status] = (acc[status] || 0) + 1;
+    return acc;
+  }, {} as Record<string, number>);
+  
+  // Calculate percentages for progress bars
+  const totalToolsWithStatus = 
+    (calibrationStatusCounts['Optimal'] || 0) + 
+    (calibrationStatusCounts['Drifting'] || 0) + 
+    (calibrationStatusCounts['Overdue'] || 0);
+  
+  const percentOptimal = totalToolsWithStatus ? Math.round((calibrationStatusCounts['Optimal'] || 0) / totalToolsWithStatus * 100) : 0;
+  const percentDrifting = totalToolsWithStatus ? Math.round((calibrationStatusCounts['Drifting'] || 0) / totalToolsWithStatus * 100) : 0;
+  const percentOverdue = totalToolsWithStatus ? Math.round((calibrationStatusCounts['Overdue'] || 0) / totalToolsWithStatus * 100) : 0;
+
   // Custom colors for charts
   const COLORS = ['#db2777', '#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ef4444', '#0ea5e9', '#14b8a6'];
 
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      {/* Your Tools Card with Progress Bars */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Calibration status breakdown</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-8">
+          <div className="space-y-2">
+            <div className="flex justify-between items-center">
+              <div className="flex items-center">
+                <span className="inline-block w-2 h-2 rounded-full bg-green-500 mr-2"></span>
+                <span className="text-sm font-medium">Optimal</span>
+              </div>
+              <span className="text-sm">{calibrationStatusCounts['Optimal'] || 0} tools ({percentOptimal}%)</span>
+            </div>
+            <Progress value={percentOptimal} className="h-2 bg-muted" indicatorColor="#10b981" />
+          </div>
+          
+          <div className="space-y-2">
+            <div className="flex justify-between items-center">
+              <div className="flex items-center">
+                <span className="inline-block w-2 h-2 rounded-full bg-amber-500 mr-2"></span>
+                <span className="text-sm font-medium">Due soon</span>
+              </div>
+              <span className="text-sm">{calibrationStatusCounts['Drifting'] || 0} tools ({percentDrifting}%)</span>
+            </div>
+            <Progress value={percentDrifting} className="h-2 bg-muted" indicatorColor="#f59e0b" />
+          </div>
+          
+          <div className="space-y-2">
+            <div className="flex justify-between items-center">
+              <div className="flex items-center">
+                <span className="inline-block w-2 h-2 rounded-full bg-red-500 mr-2"></span>
+                <span className="text-sm font-medium">Overdue</span>
+              </div>
+              <span className="text-sm">{calibrationStatusCounts['Overdue'] || 0} tools ({percentOverdue}%)</span>
+            </div>
+            <Progress value={percentOverdue} className="h-2 bg-muted" indicatorColor="#ef4444" />
+          </div>
+          
+          <div className="mt-6 pt-4 border-t border-muted">
+            <div className="flex justify-between items-center">
+              <span className="text-sm font-medium">Total tools with known status</span>
+              <span className="text-sm font-medium">{totalToolsWithStatus}</span>
+            </div>
+            <div className="text-xs text-muted-foreground mt-1">
+              {calibrationStatusCounts['Unknown'] || 0} tools with unknown status
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Division Chart */}
       <Card>
         <CardHeader>
@@ -161,61 +231,34 @@ export function DashboardCharts({ tools }: ChartProps) {
             </PieChart>
           </ResponsiveContainer>
         </CardContent>
-      </Card>
+      </Card> 
 
-      {/* Usage Status Chart */}
+      {/* Calibrator Chart - CHANGED TO AREA CHART */}
       <Card>
         <CardHeader>
-          <CardTitle>Tool Status (In Use)</CardTitle>
+          <CardTitle>Tools by Calibrator</CardTitle>
         </CardHeader>
         <CardContent className="h-[300px]">
           <ResponsiveContainer width="100%" height="100%">
-            <PieChart>
-              <Pie
-                data={statusData}
-                cx="50%"
-                cy="50%"
-                labelLine={false}
-                outerRadius={80}
-                fill="#8884d8"
-                dataKey="value"
-                label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-              >
-                {statusData.map((entry, index) => (
-                  <Cell 
-                    key={`cell-${index}`} 
-                    fill={entry.name.toLowerCase() === 'yes' ? '#10b981' : 
-                          entry.name.toLowerCase() === 'no' ? '#ef4444' : 
-                          COLORS[index % COLORS.length]} 
-                  />
-                ))}
-              </Pie>
-              <Tooltip 
-                contentStyle={{ 
-                  backgroundColor: "hsl(var(--card))",
-                  borderColor: "hsl(var(--border))",
-                  borderRadius: "var(--radius)",
-                }}
-                itemStyle={{
-                  color: "hsl(var(--foreground))"
-                }}
-              />
-            </PieChart>
-          </ResponsiveContainer>
-        </CardContent>
-      </Card>
-
-      {/* Category Chart */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Tools by Category</CardTitle>
-        </CardHeader>
-        <CardContent className="h-[300px]">
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={categoryData} layout="vertical">
+            <AreaChart 
+              data={calibratorData} 
+              margin={{ top: 10, right: 30, left: 0, bottom: 60 }}
+            >
+              <defs>
+                <linearGradient id="colorCalibrator" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.8}/>
+                  <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0.2}/>
+                </linearGradient>
+              </defs>
               <CartesianGrid strokeDasharray="3 3" />
-              <XAxis type="number" />
-              <YAxis dataKey="name" type="category" width={120} />
+              <XAxis 
+                dataKey="name" 
+                angle={-45} 
+                textAnchor="end"
+                height={70}
+                tick={{ fontSize: 11 }}
+              />
+              <YAxis />
               <Tooltip 
                 contentStyle={{ 
                   backgroundColor: "hsl(var(--card))",
@@ -225,9 +268,16 @@ export function DashboardCharts({ tools }: ChartProps) {
                 itemStyle={{
                   color: "hsl(var(--foreground))"
                 }}
+                formatter={(value) => [`${value} tools`, 'Count']}
               />
-              <Bar dataKey="value" fill="#3b82f6" />
-            </BarChart>
+              <Area 
+                type="monotone" 
+                dataKey="value" 
+                stroke="#8b5cf6" 
+                fillOpacity={1}
+                fill="url(#colorCalibrator)" 
+              />
+            </AreaChart>
           </ResponsiveContainer>
         </CardContent>
       </Card>
@@ -286,8 +336,13 @@ export function DashboardCharts({ tools }: ChartProps) {
           <div className="text-sm text-muted-foreground">
             {divisionData.length} divisions
           </div>
+          <div className="text-sm text-muted-foreground mt-4 pt-4 border-t border-muted">
+            <span className="inline-block w-3 h-3 rounded-full bg-green-500 mr-1"></span> {calibrationStatusCounts['Optimal'] || 0} Optimal
+            <span className="inline-block w-3 h-3 rounded-full bg-amber-500 mx-1 ml-3"></span> {calibrationStatusCounts['Drifting'] || 0} Drifting
+            <span className="inline-block w-3 h-3 rounded-full bg-red-500 mx-1 ml-3"></span> {calibrationStatusCounts['Overdue'] || 0} Overdue
+          </div>
         </CardContent>
       </Card>
     </div>
   );
-} 
+}

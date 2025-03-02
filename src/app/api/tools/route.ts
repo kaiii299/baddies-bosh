@@ -6,18 +6,11 @@ const prisma = new PrismaClient();
 
 export async function GET() {
   try {
-    const tools = await prisma.tools.findMany({
-      select: {
-        serialIdNo: true,
-        div: true,
-        brand: true,
-        description: true,
-        modelPartNo: true,
-        lastCalibration: true,
-      },
-    });
+    // Instead of specifying each field, get all fields by not using select
+    const tools = await prisma.tools.findMany();
 
     return NextResponse.json(tools);
+
   } catch (error) {
     console.error("Failed to fetch tools:", error);
     return NextResponse.json(
