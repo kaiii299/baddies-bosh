@@ -14,6 +14,7 @@ import {
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 
 import { Calendar, Home, Table2, Bot } from "lucide-react";
 
@@ -129,6 +130,15 @@ export function SidebarComponent() {
           </div>
         </div>
       </SidebarFooter>
+
+      <div className="mt-auto border-t pt-4 p-4">
+        <div className="flex items-center justify-between">
+          <div className="text-sm text-muted-foreground">
+            <span>Baddies Bosh</span>
+          </div>
+          <ThemeToggle />
+        </div>
+      </div>
     </Sidebar>
   );
 }

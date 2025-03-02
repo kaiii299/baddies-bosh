@@ -5,6 +5,7 @@ import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 // import { NavBar } from "@/components/NavBar";
 import { SidebarComponent } from "@/components/sidebarComponent";
 import { Toaster } from "@/components/ui/sonner";
+import { ThemeProvider } from "@/components/theme-provider";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -28,18 +29,25 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body className={`w-screen ${geistSans.variable} ${geistMono.variable}`}>
-        <SidebarProvider>
-          <SidebarComponent />
-          <div className="fixed top-4 left-4 z-50 md:hidden">
-            <SidebarTrigger />
-          </div>
-          <div className="w-full p-5">
-            <div className="my-10">{children}</div>
-          </div>
-          <Toaster position="top-right" />
-        </SidebarProvider>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <SidebarProvider>
+            <SidebarComponent />
+            <div className="fixed top-4 left-4 z-50 md:hidden">
+              <SidebarTrigger />
+            </div>
+            <div className="w-full p-5">
+              <div className="my-10">{children}</div>
+            </div>
+            <Toaster position="top-right" />
+          </SidebarProvider>
+        </ThemeProvider>
       </body>
     </html>
   );
