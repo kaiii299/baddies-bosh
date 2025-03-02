@@ -176,12 +176,12 @@ export function DashboardCharts({ tools }: ChartProps) {
             <Progress value={percentOverdue} indicatorColor="#ef4444" />
           </div>
           
-          <div className="mt-6 pt-4 border-t border-muted">
+          {/* <div className="mt-6 pt-4 border-t border-muted">
             <div className="flex justify-between items-center">
               <span className="text-sm font-medium">Total tools</span>
               <span className="text-sm font-bold">{totalToolsWithStatus}</span>
             </div>
-          </div>
+          </div> */}
         </div>
       )
     },
@@ -211,34 +211,67 @@ export function DashboardCharts({ tools }: ChartProps) {
     "brand-chart": {
       title: <CardTitle>Tools by Brand</CardTitle>,
       content: (
-        <ResponsiveContainer width="100%" height="100%">
-          <PieChart>
-            <Pie
-              data={brandData}
-              cx="50%"
-              cy="50%"
-              labelLine={false}
-              outerRadius={80}
-              fill="#8884d8"
-              dataKey="value"
-              label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-            >
-              {brandData.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-              ))}
-            </Pie>
-            <Tooltip 
-              contentStyle={{ 
-                backgroundColor: "hsl(var(--card))",
-                borderColor: "hsl(var(--border))",
-                borderRadius: "var(--radius)",
-              }}
-              itemStyle={{
-                color: "hsl(var(--foreground))"
-              }}
-            />
-          </PieChart>
-        </ResponsiveContainer>
+        <div className="h-full flex flex-col">
+          <div className="flex-1">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart 
+                data={brandData} 
+                margin={{ top: 10, right: 30, left: 0, bottom: 20 }}
+              >
+                <defs>
+                  <linearGradient id="colorBrand" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#db2777" stopOpacity={0.8}/>
+                    <stop offset="95%" stopColor="#db2777" stopOpacity={0.2}/>
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis 
+                  dataKey="name" 
+                  angle={-45} 
+                  textAnchor="end"
+                  height={50}
+                  tick={{ fontSize: 11 }}
+                />
+                <YAxis />
+                <Tooltip 
+                  contentStyle={{ 
+                    backgroundColor: "hsl(var(--card))",
+                    borderColor: "hsl(var(--border))",
+                    borderRadius: "var(--radius)",
+                  }}
+                  itemStyle={{
+                    color: "hsl(var(--foreground))"
+                  }}
+                  formatter={(value) => [`${value} tools`, 'Count']}
+                />
+                <Area 
+                  type="monotone" 
+                  dataKey="value" 
+                  stroke="#db2777" 
+                  fillOpacity={1}
+                  fill="url(#colorBrand)" 
+                />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
+          
+          <div className="mt-4 border-t pt-3 text-sm">
+            <div className="flex justify-between mb-1">
+              <span className="text-muted-foreground">Top Brand:</span>
+              <span className="font-medium">{brandData[0]?.name} ({brandData[0]?.value} tools)</span>
+            </div>
+            <div className="flex justify-between mb-1">
+              <span className="text-muted-foreground">Unique Brands:</span>
+              <span className="font-medium">{Object.keys(brandCounts).length}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">Brand Diversity:</span>
+              <span className="font-medium">
+                {Math.round((Object.keys(brandCounts).length / tools.length) * 100)}% of inventory
+              </span>
+            </div>
+          </div>
+        </div>
       )
     },
     "calibrator-chart": {
