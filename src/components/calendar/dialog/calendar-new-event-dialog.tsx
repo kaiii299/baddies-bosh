@@ -21,6 +21,8 @@ import { useCalendarContext } from "../calendar-context";
 import { format } from "date-fns";
 import { DateTimePicker } from "@/components/form/date-time-picker";
 import { ColorPicker } from "@/components/form/color-picker";
+import { generateGoogleCalendarLink } from "@/lib/calendar-utils";
+import { ExternalLink } from "lucide-react";
 
 const formSchema = z
   .object({
@@ -133,7 +135,31 @@ export default function CalendarNewEventDialog() {
               )}
             />
 
-            <div className="flex justify-end">
+            <div className="flex justify-between">
+              <Button
+                variant="outline"
+                type="button"
+                onClick={() => {
+                  const formValues = form.getValues();
+                  if (formValues.title && formValues.start && formValues.end) {
+                    const tempEvent = {
+                      id: "temp-id",
+                      title: formValues.title,
+                      start: new Date(formValues.start),
+                      end: new Date(formValues.end),
+                      color: formValues.color,
+                    };
+                    const googleCalendarUrl =
+                      generateGoogleCalendarLink(tempEvent);
+                    window.open(googleCalendarUrl, "_blank");
+                  } else {
+                    form.trigger();
+                  }
+                }}
+              >
+                <ExternalLink className="h-4 w-4 mr-2" />
+                Add to Google Calendar
+              </Button>
               <Button type="submit">Create event</Button>
             </div>
           </form>
