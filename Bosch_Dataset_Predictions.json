@@ -4262,7 +4262,7 @@
         "actionForRenewalReminder": "nan",
         "status": "Optimal",
         "predictedIdealCalibrationDate": "NaT",
-        "differenceFromPredictions": NaN,
+        "differenceFromPredictions": 183,
         "predictionValue": -3.873011589050293
     },
     {
@@ -4289,7 +4289,7 @@
         "actionForRenewalReminder": "nan",
         "status": "Optimal",
         "predictedIdealCalibrationDate": "NaT",
-        "differenceFromPredictions": NaN,
+        "differenceFromPredictions": 152,
         "predictionValue": -3.8611648082733154
     },
     {
@@ -4316,7 +4316,7 @@
         "actionForRenewalReminder": "nan",
         "status": "Optimal",
         "predictedIdealCalibrationDate": "NaT",
-        "differenceFromPredictions": NaN,
+        "differenceFromPredictions": 124,
         "predictionValue": -4.1457905769348145
     },
     {
