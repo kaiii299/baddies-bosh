@@ -1,6 +1,6 @@
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   BarChart,
   Bar,
@@ -12,11 +12,11 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  Legend,
   AreaChart,
   Area,
 } from "recharts";
 import { Progress } from "@/components/ui/progress";
+import { ToolData } from "@/types/tool";
 
 interface ChartProps {
   tools: ToolData[];
@@ -48,14 +48,14 @@ export function DashboardCharts({ tools }: ChartProps) {
     .slice(0, 5); // Top 5 brands
 
   // Process usage status data
-  const statusCounts = tools.reduce((acc, tool) => {
-    const status = tool.inUse || 'Unknown';
-    acc[status] = (acc[status] || 0) + 1;
-    return acc;
-  }, {} as Record<string, number>);
+  // const statusCounts = tools.reduce((acc, tool) => {
+  //   const status = tool.inUse || 'Unknown';
+  //   acc[status] = (acc[status] || 0) + 1;
+  //   return acc;
+  // }, {} as Record<string, number>);
 
-  const statusData = Object.entries(statusCounts)
-    .map(([name, value]) => ({ name, value }));
+  // const statusData = Object.entries(statusCounts)
+  //   .map(([name, value]) => ({ name, value }));
 
   // Process calibrator data
   const calibratorCounts = tools.reduce((acc, tool) => {

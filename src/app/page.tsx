@@ -5,7 +5,7 @@ const page = async () => {
 
   async function getToolsData() {
     try {
-      const baseUrl = "http://localhost:3000";
+      const baseUrl = process.env.NEXT_PUBLIC_API_URL;
       const res = await fetch(`${baseUrl}/api/tools`, {
         cache: "no-store",
         headers: {
@@ -24,10 +24,7 @@ const page = async () => {
     }
   }
   
-  const tools = await getToolsData();
-
-  console.log(tools);
-  
+  const tools = await getToolsData(); 
   
   return (
     <div>

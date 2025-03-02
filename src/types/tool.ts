@@ -1,4 +1,4 @@
-type ToolData = {
+export type ToolData = {
   serialIdNo: string;                    // Required (Primary Key)
   div?: string;                           // Optional
   description: string;                    // Required

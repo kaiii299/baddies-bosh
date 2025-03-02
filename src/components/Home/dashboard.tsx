@@ -1,6 +1,4 @@
 "use client";
-
-import { TrendingUp } from "lucide-react";
 import {
   Pie,
   PieChart,
@@ -30,6 +28,7 @@ import {
 } from "@/components/ui/chart";
 import CountUp from "@/components/countup";
 import { DashboardCharts } from "@/components/dashboard/charts";
+import { ToolData } from "@/types/tool";
 // Fetch data from the API
 
 type props = {
