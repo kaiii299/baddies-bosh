@@ -307,17 +307,17 @@ const ExportPage = () => {
     document.body.removeChild(link);
   };
 
-  // Format names for display
-  const formatDataTypeName = (type: ExportDataType) => {
-    switch (type) {
-      case "compliance":
-        return "Compliance Data";
-      case "tools":
-        return "Tool Data";
-      case "calendar":
-        return "Calendar Data";
-    }
-  };
+  //   // Format names for display
+  //   const formatDataTypeName = (type: ExportDataType) => {
+  //     switch (type) {
+  //       case "compliance":
+  //         return "Compliance Data";
+  //       case "tools":
+  //         return "Tool Data";
+  //       case "calendar":
+  //         return "Calendar Data";
+  //     }
+  //   };
 
   // Get icon for format
   const getFormatIcon = (format: ExportFormat) => {
