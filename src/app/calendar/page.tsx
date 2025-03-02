@@ -18,6 +18,7 @@ import boschData from "../data/Bosch_Dataset_Predictions.json";
 import { generateGoogleCalendarLink } from "@/lib/calendar-utils";
 import { ExternalLink } from "lucide-react";
 import { formatDisplayDate } from "@/lib/calendar-utils";
+import { generateMockEvents } from "@/lib/mock";
 
 // Define the type for the Bosch dataset items
 type BoschToolData = {
@@ -74,7 +75,15 @@ const Calendar = dynamic(() => import("@/components/calendar/calendar"), {
 });
 
 const CalendarPage = () => {
-  const [events, setEvents] = React.useState<CalendarEvent[]>([]);
+  // Initialize with mock events
+  const [events, setEvents] = React.useState<CalendarEvent[]>(() => {
+    // Only run this on the client side
+    if (typeof window !== "undefined") {
+      return generateMockEvents();
+    }
+    return [];
+  });
+
   const [mode, setMode] = React.useState<Mode>("month");
   const [date, setDate] = React.useState<Date>(new Date());
   const [acceptedTools, setAcceptedTools] = React.useState<string[]>([]);
