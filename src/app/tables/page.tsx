@@ -1,35 +1,15 @@
 import { DataTable } from '@/components/tableView';
-import React from 'react'
+import React from 'react';
+import fs from 'fs';
+import path from 'path';
 
-async function getTools() {
-  try {
-    // Use absolute URL in development
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ;
-    const res = await fetch(`${baseUrl}/api/tools`, {
-      cache: 'no-store',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
-    
-    if (!res.ok) {
-      throw new Error('Failed to fetch tools');
-    }
-
-    const data = await res.json();
-    return data;
-  } catch (error) {
-    console.error('Error loading tools:', error);
-    return [];
-  }
-}
-
-export default async function ToolsPage() {
-  const tools = await getTools();
+export default function ToolsPage() {
+  // Get tools data directly from JSON
+  const toolsData = JSON.parse(fs.readFileSync(path.join(process.cwd(), 'src', 'app', 'data', 'Bosch_Dataset_Predictions.json'), 'utf8'));
 
   return (
     <div className="w-full">
-      <DataTable initialData={tools} />
+      <DataTable initialData={toolsData} />
     </div>
   );
 }

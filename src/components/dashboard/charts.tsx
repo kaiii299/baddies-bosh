@@ -20,24 +20,7 @@ import { Progress } from "@/components/ui/progress";
 import { ToolData } from "@/types/tool";
 import { Grip, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  DndContext,
-  closestCenter,
-  MouseSensor,
-  TouchSensor,
-  DragOverlay,
-  useSensor,
-  useSensors,
-  DragStartEvent,
-  DragEndEvent,
-} from '@dnd-kit/core';
-import {
-  arrayMove,
-  SortableContext,
-  rectSortingStrategy,
-  useSortable,
-} from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
+import { DragDropContext, Droppable, Draggable, DropResult } from "@hello-pangea/dnd";
 
 interface ChartProps {
   tools: ToolData[];
@@ -52,38 +35,6 @@ type CardType =
   | "interval-chart"
   | "tools-summary";
 
-// Card component that can be dragged
-function DraggableCard({ id, children }: { id: CardType; children: React.ReactNode }) {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-  } = useSortable({ id });
-
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-  };
-
-  return (
-    <div ref={setNodeRef} style={style} className="h-full">
-      <Card className="h-full">
-        <CardHeader className="cursor-move" {...attributes} {...listeners}>
-          <div className="flex items-center gap-2">
-            <Grip className="h-4 w-4 text-muted-foreground" />
-            {typeof children === 'object' && 'title' in children ? children.title : null}
-          </div>
-        </CardHeader>
-        <CardContent className="h-[calc(100%-70px)] overflow-hidden">
-          {typeof children === 'object' && 'content' in children ? children.content : children}
-        </CardContent>
-      </Card>
-    </div>
-  );
-}
-
 export function DashboardCharts({ tools }: ChartProps) {
   // Default order of cards
   const defaultCards: CardType[] = [
@@ -97,23 +48,7 @@ export function DashboardCharts({ tools }: ChartProps) {
 
   // State for card order
   const [cards, setCards] = useState<CardType[]>(defaultCards);
-  const [activeId, setActiveId] = useState<CardType | null>(null);
   const [isMounted, setIsMounted] = useState(false);
-
-  // Setup drag sensors
-  const sensors = useSensors(
-    useSensor(MouseSensor, {
-      activationConstraint: {
-        distance: 10,
-      },
-    }),
-    useSensor(TouchSensor, {
-      activationConstraint: {
-        delay: 250,
-        tolerance: 5,
-      },
-    })
-  );
 
   // Load saved card order from localStorage on component mount
   useEffect(() => {
@@ -421,28 +356,17 @@ export function DashboardCharts({ tools }: ChartProps) {
     }
   };
 
-  // Handle drag start
-  function handleDragStart(event: DragStartEvent) {
-    setActiveId(event.active.id as CardType);
-  }
-
-  // Handle drag end
-  function handleDragEnd(event: DragEndEvent) {
-    const { active, over } = event;
+  // Handle drag end - the API differs from dnd-kit
+  const handleDragEnd = (result: DropResult) => {
+    if (!result.destination) return;
     
-    if (over && active.id !== over.id) {
-      setCards((items) => {
-        const oldIndex = items.findIndex(id => id === active.id);
-        const newIndex = items.findIndex(id => id === over.id);
-        
-        const newOrder = arrayMove(items, oldIndex, newIndex);
-        localStorage.setItem('dashboard-cards', JSON.stringify(newOrder));
-        return newOrder;
-      });
-    }
+    const items = Array.from(cards);
+    const [reorderedItem] = items.splice(result.source.index, 1);
+    items.splice(result.destination.index, 0, reorderedItem);
     
-    setActiveId(null);
-  }
+    setCards(items);
+    localStorage.setItem('dashboard-cards', JSON.stringify(items));
+  };
 
   // Reset layout function
   const resetLayout = () => {
@@ -473,37 +397,49 @@ export function DashboardCharts({ tools }: ChartProps) {
         </Button>
       </div>
 
-      <DndContext
-        sensors={sensors}
-        collisionDetection={closestCenter}
-        onDragStart={handleDragStart}
-        onDragEnd={handleDragEnd}
-      >
-        <SortableContext items={cards} strategy={rectSortingStrategy}>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {cards.map((id) => (
-              <DraggableCard key={id} id={id}>
-                {cardContents[id]}
-              </DraggableCard>
-            ))}
-          </div>
-        </SortableContext>
-        
-        <DragOverlay>
-          {activeId ? (
-            <div className="h-[360px] w-full opacity-80 pointer-events-none">
-              <Card className="h-full">
-                <CardHeader>
-                  {cardContents[activeId].title}
-                </CardHeader>
-                <CardContent className="h-[calc(100%-70px)]">
-                  {cardContents[activeId].content}
-                </CardContent>
-              </Card>
+      <DragDropContext onDragEnd={handleDragEnd}>
+        <Droppable droppableId="dashboard" direction="horizontal" type="card">
+          {(provided) => (
+            <div 
+              ref={provided.innerRef}
+              {...provided.droppableProps}
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
+            >
+              {cards.map((id, index) => (
+                <Draggable key={id} draggableId={id} index={index}>
+                  {(provided, snapshot) => (
+                    <div
+                      ref={provided.innerRef}
+                      {...provided.draggableProps}
+                      className="h-full"
+                      style={{
+                        ...provided.draggableProps.style,
+                        opacity: snapshot.isDragging ? 0.8 : 1
+                      }}
+                    >
+                      <Card className="h-full">
+                        <CardHeader 
+                          className="cursor-move" 
+                          {...provided.dragHandleProps}
+                        >
+                          <div className="flex items-center gap-2">
+                            <Grip className="h-4 w-4 text-muted-foreground" />
+                            {cardContents[id].title}
+                          </div>
+                        </CardHeader>
+                        <CardContent className="h-[calc(100%-70px)] overflow-hidden">
+                          {cardContents[id].content}
+                        </CardContent>
+                      </Card>
+                    </div>
+                  )}
+                </Draggable>
+              ))}
+              {provided.placeholder}
             </div>
-          ) : null}
-        </DragOverlay>
-      </DndContext>
+          )}
+        </Droppable>
+      </DragDropContext>
     </div>
   );
 }

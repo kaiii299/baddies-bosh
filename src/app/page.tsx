@@ -1,34 +1,14 @@
 import Dashboard from "@/components/Home/dashboard";
 import React from "react";
+import fs from 'fs';
+import path from 'path';
 
-const page = async () => {
+const page = () => {
+  const toolsData = JSON.parse(fs.readFileSync(path.join(process.cwd(), 'src', 'app', 'data', 'Bosch_Dataset_Predictions.json'), 'utf8'));
 
-  async function getToolsData() {
-    try {
-      const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
-      const res = await fetch(`${baseUrl}/api/tools`, {
-        cache: "no-store",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-
-      if (!res.ok) {
-        throw new Error("Failed to fetch tools");
-      }
-
-      return res.json();
-    } catch (error) {
-      console.error("Error loading tools:", error);
-      return [];
-    }
-  }
-  
-  const tools = await getToolsData(); 
-  
   return (
     <div>
-      <Dashboard tools={tools} />
+      <Dashboard tools={toolsData} />
     </div>
   );
 };
