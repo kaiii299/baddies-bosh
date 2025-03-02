@@ -117,14 +117,8 @@ export function DashboardCharts({ tools }: ChartProps) {
 
   // Process calibration status data
   const getCalibrationStatus = (tool: ToolData) => {
-    if (!tool.remainingMonths) return 'Unknown';
-    
-    const months = parseInt(tool.remainingMonths);
-    if (isNaN(months)) return 'Unknown';
-    
-    if (months < 0) return 'Overdue';
-    if (months <= 2) return 'Drifting';
-    return 'Optimal';
+    // Use the status field directly from the data
+    return tool.status || 'Unknown';
   };
   
   const calibrationStatusCounts = tools.reduce((acc, tool) => {
@@ -134,10 +128,7 @@ export function DashboardCharts({ tools }: ChartProps) {
   }, {} as Record<string, number>);
   
   // Calculate percentages for progress bars
-  const totalToolsWithStatus = 
-    (calibrationStatusCounts['Optimal'] || 0) + 
-    (calibrationStatusCounts['Drifting'] || 0) + 
-    (calibrationStatusCounts['Overdue'] || 0);
+  const totalToolsWithStatus = tools.length;
   
   const percentOptimal = totalToolsWithStatus ? Math.round((calibrationStatusCounts['Optimal'] || 0) / totalToolsWithStatus * 100) : 0;
   const percentDrifting = totalToolsWithStatus ? Math.round((calibrationStatusCounts['Drifting'] || 0) / totalToolsWithStatus * 100) : 0;
@@ -158,7 +149,7 @@ export function DashboardCharts({ tools }: ChartProps) {
                 <span className="inline-block w-3 h-3 rounded-full bg-green-500 mr-2"></span>
                 <span className="text-sm font-medium">Optimal</span>
               </div>
-              <span className="text-sm">{calibrationStatusCounts['Optimal'] || 0} tools ({percentOptimal}%)</span>
+              <span className="text-sm font-bold">{calibrationStatusCounts['Optimal'] || 0} tools</span>
             </div>
             <Progress value={percentOptimal} indicatorColor="#10b981" />
           </div>
@@ -169,7 +160,7 @@ export function DashboardCharts({ tools }: ChartProps) {
                 <span className="inline-block w-3 h-3 rounded-full bg-amber-500 mr-2"></span>
                 <span className="text-sm font-medium">Drifting (due soon)</span>
               </div>
-              <span className="text-sm">{calibrationStatusCounts['Drifting'] || 0} tools ({percentDrifting}%)</span>
+              <span className="text-sm font-bold">{calibrationStatusCounts['Drifting'] || 0} tools</span>
             </div>
             <Progress value={percentDrifting} indicatorColor="#f59e0b" />
           </div>
@@ -180,18 +171,15 @@ export function DashboardCharts({ tools }: ChartProps) {
                 <span className="inline-block w-3 h-3 rounded-full bg-red-500 mr-2"></span>
                 <span className="text-sm font-medium">Overdue</span>
               </div>
-              <span className="text-sm">{calibrationStatusCounts['Overdue'] || 0} tools ({percentOverdue}%)</span>
+              <span className="text-sm font-bold">{calibrationStatusCounts['Overdue'] || 0} tools</span>
             </div>
             <Progress value={percentOverdue} indicatorColor="#ef4444" />
           </div>
           
           <div className="mt-6 pt-4 border-t border-muted">
             <div className="flex justify-between items-center">
-              <span className="text-sm font-medium">Total tools with known status</span>
-              <span className="text-sm font-medium">{totalToolsWithStatus}</span>
-            </div>
-            <div className="text-xs text-muted-foreground mt-1">
-              {calibrationStatusCounts['Unknown'] || 0} tools with unknown status
+              <span className="text-sm font-medium">Total tools</span>
+              <span className="text-sm font-bold">{totalToolsWithStatus}</span>
             </div>
           </div>
         </div>

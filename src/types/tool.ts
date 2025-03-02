@@ -20,4 +20,5 @@ export type ToolData = {
   externalToleranceLimit?: string;         // Optional
   internalToleranceLimit?: string;         // Optional
   actionForRenewalReminder?: string;       // Optional
+  status?: string;                         // Optional
 };
