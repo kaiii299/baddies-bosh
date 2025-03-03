@@ -52,10 +52,10 @@ export default function Dashboard({ tools }: props) {
   const uniqueBrands = new Set(tools.map((tool: ToolData) => tool.brand)).size;
 
   // Count tools needing calibration soon (within 3 months)
-  const toolsNeedingCalibration = tools.filter((tool: ToolData) => {
-    const months = parseInt(tool.remainingMonths || "999");
-    return !isNaN(months) && months <= 3 && months >= 0;
-  }).length;
+  // const toolsNeedingCalibration = tools.filter((tool: ToolData) => {
+  //   const months = parseInt(tool.remainingMonths || "999");
+  //   return !isNaN(months) && months <= 3 && months >= 0;
+  // }).length;
 
   // Real dynamic card data
   const cardData = [
