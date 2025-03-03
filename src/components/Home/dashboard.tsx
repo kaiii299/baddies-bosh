@@ -67,7 +67,7 @@ export default function Dashboard({ tools }: props) {
     {
       title: "Tools In Use",
       description: `${inUsePercentage}% of inventory`,
-      value: toolsInUse,
+      value: 125,
     },
     {
       title: "Unique Brands",
