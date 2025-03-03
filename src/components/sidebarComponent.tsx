@@ -16,7 +16,7 @@ import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 
-import { Calendar, Home, Table2, Bot } from "lucide-react";
+import { Calendar, Home, Table2, Bot, Download } from "lucide-react";
 
 /**
  * Navigation items for the sidebar
@@ -42,6 +42,11 @@ const items = [
     title: "Baddies AI",
     url: "/baddiesai",
     icon: Bot,
+  },
+  {
+    title: "Export Data",
+    url: "/export",
+    icon: Download, // Make sure to import Download from lucide-react
   },
   // Commented out items retained for future use
   // {
@@ -88,7 +93,9 @@ export function SidebarComponent() {
                     <SidebarMenuButton asChild>
                       <Link
                         href={item.url}
-                        className={`${isActive ? "bg-pink-600" : "hover:bg-sidebar-accent"}`}
+                        className={`${
+                          isActive ? "bg-pink-600" : "hover:bg-sidebar-accent"
+                        }`}
                       >
                         {/* Icon with conditional styling */}
                         <item.icon

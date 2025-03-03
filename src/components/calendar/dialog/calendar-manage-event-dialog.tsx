@@ -8,6 +8,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogFooter,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import {
   Form,
@@ -20,7 +21,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useCalendarContext } from "../calendar-context";
-import { format } from "date-fns";
+// import { format } from "date-fns";
 import { DateTimePicker } from "@/components/form/date-time-picker";
 import { ColorPicker } from "@/components/form/color-picker";
 import {
@@ -34,6 +35,9 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { generateGoogleCalendarLink } from "@/lib/calendar-utils";
+import { ExternalLink } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
 
 const formSchema = z
   .object({
@@ -45,6 +49,7 @@ const formSchema = z
       message: "Invalid end date",
     }),
     color: z.string(),
+    description: z.string().optional(),
   })
   .refine(
     (data) => {
@@ -79,6 +84,7 @@ export default function CalendarManageEventDialog() {
       start: "",
       end: "",
       color: "blue",
+      description: "",
     },
   });
 
@@ -86,9 +92,10 @@ export default function CalendarManageEventDialog() {
     if (selectedEvent) {
       form.reset({
         title: selectedEvent.title,
-        start: format(selectedEvent.start, "yyyy-MM-dd'T'HH:mm"),
-        end: format(selectedEvent.end, "yyyy-MM-dd'T'HH:mm"),
+        start: selectedEvent.start.toISOString(),
+        end: selectedEvent.end.toISOString(),
         color: selectedEvent.color,
+        description: selectedEvent.description || "",
       });
     }
   }, [selectedEvent, form]);
@@ -102,6 +109,7 @@ export default function CalendarManageEventDialog() {
       start: new Date(values.start),
       end: new Date(values.end),
       color: values.color,
+      description: values.description,
     };
 
     setEvents(
@@ -109,27 +117,47 @@ export default function CalendarManageEventDialog() {
         event.id === selectedEvent.id ? updatedEvent : event
       )
     );
-    handleClose();
+    setManageEventDialogOpen(false);
+    setSelectedEvent(null);
   }
 
   function handleDelete() {
     if (!selectedEvent) return;
     setEvents(events.filter((event) => event.id !== selectedEvent.id));
-    handleClose();
-  }
-
-  function handleClose() {
     setManageEventDialogOpen(false);
     setSelectedEvent(null);
-    form.reset();
   }
 
+  // Extract tool details from description if it's a calibration event
+  const toolDetails = selectedEvent?.description
+    ? selectedEvent.description.split(", ").map((item) => {
+        const [key, value] = item.split(": ");
+        return { key, value };
+      })
+    : [];
+
+  const isCalibrationEvent = selectedEvent?.title?.startsWith("Calibrate:");
+
   return (
-    <Dialog open={manageEventDialogOpen} onOpenChange={handleClose}>
-      <DialogContent>
+    <Dialog
+      open={manageEventDialogOpen}
+      onOpenChange={(open) => {
+        setManageEventDialogOpen(open);
+        if (!open) setSelectedEvent(null);
+      }}
+    >
+      <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Manage event</DialogTitle>
+          <DialogTitle>
+            {isCalibrationEvent ? "Calibration Details" : "Edit Event"}
+          </DialogTitle>
+          {isCalibrationEvent && (
+            <DialogDescription>
+              Tool calibration scheduled from the recommendations
+            </DialogDescription>
+          )}
         </DialogHeader>
+
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <FormField
@@ -139,12 +167,40 @@ export default function CalendarManageEventDialog() {
                 <FormItem>
                   <FormLabel className="font-bold">Title</FormLabel>
                   <FormControl>
-                    <Input placeholder="Event title" {...field} />
+                    <Input {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
+
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="font-bold">Description</FormLabel>
+                  <FormControl>
+                    <Textarea {...field} rows={3} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {isCalibrationEvent && toolDetails.length > 0 && (
+              <div className="bg-gray-50 p-3 rounded-md">
+                <h3 className="text-sm font-medium mb-2">Tool Information</h3>
+                <div className="space-y-1 text-sm">
+                  {toolDetails.map((detail, index) => (
+                    <div key={index} className="flex">
+                      <span className="font-medium w-24">{detail.key}:</span>
+                      <span>{detail.value}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             <FormField
               control={form.control}
@@ -189,28 +245,50 @@ export default function CalendarManageEventDialog() {
             />
 
             <DialogFooter className="flex justify-between gap-2">
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <Button variant="destructive" type="button">
-                    Delete
-                  </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>Delete event</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      Are you sure you want to delete this event? This action
-                      cannot be undone.
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction onClick={handleDelete}>
+              <div className="flex gap-2">
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button variant="destructive" type="button">
                       Delete
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Delete event</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Are you sure you want to delete this event? This action
+                        cannot be undone.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction onClick={handleDelete}>
+                        Delete
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+
+                <Button
+                  variant="outline"
+                  type="button"
+                  onClick={() => {
+                    if (selectedEvent) {
+                      const googleCalendarUrl = generateGoogleCalendarLink({
+                        ...selectedEvent,
+                        start: new Date(form.getValues().start),
+                        end: new Date(form.getValues().end),
+                        title: form.getValues().title,
+                      });
+                      window.open(googleCalendarUrl, "_blank");
+                    }
+                  }}
+                >
+                  <ExternalLink className="h-4 w-4 mr-2" />
+                  Add to Google Calendar
+                </Button>
+              </div>
+
               <Button type="submit">Update event</Button>
             </DialogFooter>
           </form>
