@@ -42,11 +42,11 @@ export default function Dashboard({ tools }: props) {
   const totalTools = tools.length;
 
   // Tools in use count
-  const toolsInUse = tools.filter(
-    (tool: ToolData) => tool.inUse?.toLowerCase() === "yes"
-  ).length;
-  const inUsePercentage =
-    totalTools > 0 ? Math.round((toolsInUse / totalTools) * 100) : 0;
+  // const toolsInUse = tools.filter(
+  //   (tool: ToolData) => tool.inUse?.toLowerCase() === "yes"
+  // ).length;
+  // const inUsePercentage =
+  //   totalTools > 0 ? Math.round((toolsInUse / totalTools) * 100) : 0;
 
   // Count unique brands
   const uniqueBrands = new Set(tools.map((tool: ToolData) => tool.brand)).size;
