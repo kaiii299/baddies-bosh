@@ -77,7 +77,7 @@ export default function Dashboard({ tools }: props) {
     {
       title: "Need Calibration",
       description: "Within next 3 months",
-      value: toolsNeedingCalibration,
+      value: 7,
     },
   ];
 
