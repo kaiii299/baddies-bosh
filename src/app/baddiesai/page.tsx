@@ -235,7 +235,7 @@ export default function BaddiesAIPage() {
     setIsLoading(true);
 
     // Calculate a variable thinking time between 2.5-3.5 seconds
-    const thinkingTime = 2500 + Math.random() * 1000;
+    const thinkingTime = 3000 + Math.random() * 1000;
 
     // Find appropriate answer with tolerance for mistakes
     setTimeout(() => {
